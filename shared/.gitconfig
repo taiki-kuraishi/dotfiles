@@ -1,0 +1,41 @@
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+[user]
+	name = taiki-kuraishi
+	email = taiki-kuraishi@users.noreply.github.com
+[alias]
+	a = add
+	aa = add --all
+	br = branch
+	cl = clone
+	cm = commit
+	cma = commit --amend
+	cman = commit --amend --no-edit
+	cmanm = commit --amend --no-edit -m
+	cmm = commit -m
+	co = checkout
+	df = diff
+	f = fetch
+	fpa = fetch --prune --all
+	lg = log
+	m = merge
+	ms = merge --squash
+	mo = merge origin
+	mso = merge --squash origin
+	p = push
+	pl = pull
+	po = pull origin
+	r = reset
+	rpo = remote prune origin
+	rsh = reset --soft HEAD^
+	s = status
+	sh = stash
+	ss = status --short
+	sw = switch
+	lg = log --graph --decorate --abbrev-commit --format=format:'%C(blue)%h%C(reset) - %C(green)(%ar)%C(reset)%C(yellow)%d%C(reset)\n  %C(white)%s%C(reset) %C(dim white)- %an%C(reset)'
+	empty-commit = commit --allow-empty -m "empty commit"
+[ghq]
+	root = ~/Documents/GitHub
