@@ -1,0 +1,13 @@
+[tools]
+bun = "latest"
+node = "latest"
+pnpm = "latest"
+uv = "latest"
+go = "latest"
+java = "latest"
+"npm:turbo" = "latest"
+"npm:@openai/codex" = "latest"
+
+[settings]
+npm.bun = true
+idiomatic_version_file_enable_tools = ["python"]
