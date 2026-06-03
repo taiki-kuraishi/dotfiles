@@ -5,7 +5,7 @@
 	clean = git-lfs clean -- %f
 [user]
 	name = taiki-kuraishi
-	email = taiki-kuraishi@users.noreply.github.com
+	email = 131664944+taiki-kuraishi@users.noreply.github.com
 [alias]
 	a = add
 	aa = add --all
@@ -39,3 +39,9 @@
 	empty-commit = commit --allow-empty -m "empty commit"
 [ghq]
 	root = ~/Documents/GitHub
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

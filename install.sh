@@ -20,7 +20,10 @@ create_symlink() {
 # create symlink
 create_symlink "$SCRIPT_DIR/shared/.gitconfig" "$HOME/.gitconfig"
 create_symlink "$SCRIPT_DIR/shared/.mcp.json" "$HOME/.mcp.json"
-create_symlink "$SCRIPT_DIR/.config/mise/config.toml" "$HOME/.config/mise/config.toml"
+create_symlink "$SCRIPT_DIR/shared/.config/mise/config.toml" "$HOME/.config/mise/config.toml"
+create_symlink "$SCRIPT_DIR/shared/.config/zed/settings.json" "$HOME/.config/zed/settings.json"
+create_symlink "$SCRIPT_DIR/shared/.config/zed/keymap.json" "$HOME/.config/zed/keymap.json"
+create_symlink "$SCRIPT_DIR/macos/.config/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json"
 
 mise install
 

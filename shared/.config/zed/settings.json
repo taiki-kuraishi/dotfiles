@@ -1,0 +1,105 @@
+// Zed settings
+// FYI: https://zed.dev/docs/reference/all-settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "cli_default_open_behavior": "new_window",
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "languages": {
+    "TypeScript": {
+      "show_edit_predictions": true,
+      "inlay_hints": {
+        "edit_debounce_ms": 200,
+      },
+      "tab_size": 2,
+    },
+  },
+  "edit_predictions": {
+    "disabled_globs": [],
+    "mode": "eager",
+    "open_ai_compatible_api": {
+      "api_url": "https://api.openai.com/v1/chat/completions",
+      "model": "gpt-5.4-nano"
+    },
+    "provider": "none",
+  },
+  "ui_font_family": "JetBrains Mono",
+  "icon_theme": "Catppuccin Mocha",
+  "ui_font_size": 16,
+  "buffer_font_size": 14.0,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Catppuccin Mocha",
+  },
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000,
+    },
+  },
+  "show_whitespaces": "all",
+  "format_on_save": "on",
+  "terminal": {
+    "font_family": "0xProto Nerd Font",
+    "font_size": 14,
+    "line_height": "standard",
+    "default_height": 500,
+  },
+  // FYI: https://zed.dev/docs/languages/typescript?highlight=typescript#large-projects
+  "lsp": {
+    "vtsls": {
+      "settings": {
+        "vtsls": {
+          "autoUseWorkspaceTsdk": true,
+          "experimental": {
+            "completion": {
+              "enableServerSideFuzzyMatch": true,
+              "entriesLimit": 10,
+            },
+          },
+        },
+        "typescript": {
+          "preferGoToSourceDefinition": true,
+          "tsserver": {
+            "maxTsServerMemory": 24576,
+            "enableTracing": false,
+            "log": "off",
+          },
+          // "tsserver": { "maxTsServerMemory": 16184 }
+        },
+        "javascript": {
+          "preferGoToSourceDefinition": true,
+          "tsserver": {
+            "maxTsServerMemory": 8192,
+            "enableTracing": false,
+            "log": "off",
+          },
+        },
+      },
+    },
+  },
+}

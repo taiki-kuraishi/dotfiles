@@ -5,8 +5,6 @@ pnpm = "latest"
 uv = "latest"
 go = "latest"
 java = "latest"
-"npm:turbo" = "latest"
-"npm:@openai/codex" = "latest"
 
 [settings]
 npm.bun = true
