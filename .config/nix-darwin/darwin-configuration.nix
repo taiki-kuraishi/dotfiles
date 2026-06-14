@@ -1,6 +1,11 @@
 { pkgs, ... }: {
   nix.settings.experimental-features = "nix-command flakes";
-  environment.systemPackages = [ pkgs.vim pkgs.starship pkgs.git ];
+  environment.systemPackages = [
+    pkgs.vim
+    pkgs.starship
+    pkgs.git
+    pkgs.nixfmt
+  ];
   programs.zsh.enable = true;
   programs.zsh.promptInit = ''
     eval "$(starship init zsh)"
@@ -37,6 +42,7 @@
     casks = [
       "google-chrome"
       "zed"
+      "raycast"
     ];
     brews = [
       "mise"

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# yadm commit の前に、ステージ済みの .nix を nixfmt で整形して再ステージする
+set -euo pipefail
+
+# yadm フック実行中は GIT_DIR が yadm リポを指すので、git コマンドはそのまま yadm リポに作用する
+staged_nix=$(git diff --cached --name-only --diff-filter=ACM -- '*.nix')
+[ -z "$staged_nix" ] && exit 0
+
+# nixfmt は systemPackages 導入後に使用可。未導入でも nix run で動く
+fmt() { command -v nixfmt >/dev/null 2>&1 && nixfmt "$@" || nix run nixpkgs#nixfmt -- "$@"; }
+
+while IFS= read -r f; do
+  abs="$HOME/$f"          # yadm の作業ツリーは $HOME
+  [ -f "$abs" ] || continue
+  fmt "$abs"
+  git add -- "$f"         # 整形結果をコミットに含める
+done <<< "$staged_nix"
