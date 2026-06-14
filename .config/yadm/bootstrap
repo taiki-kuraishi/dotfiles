@@ -1,5 +1,29 @@
 #!/bin/sh
-# install mise-managed tools after yadm clone
+# yadm bootstrap: provision a fresh machine after `yadm clone`.
+set -e
+
+# 1. Install Nix (Determinate Systems installer) if missing.
+if ! command -v nix >/dev/null 2>&1; then
+  curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
+fi
+
+# Make nix available in this (non-login) shell.
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+
+# 2. Apply nix-darwin.
+#    The Nix installer writes /etc/nix/nix.conf, which conflicts with nix-darwin's
+#    own management of that file on first activation; move it aside if present.
+if [ -f /etc/nix/nix.conf ] && [ ! -e /etc/nix/nix.conf.before-nix-darwin ]; then
+  sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.before-nix-darwin
+fi
+# Use the flake-based first-run form (works before darwin-rebuild is on PATH).
+# `env PATH=$PATH` keeps nix on root's PATH under sudo.
+sudo env "PATH=$PATH" nix run nix-darwin/master#darwin-rebuild -- \
+  switch --flake "$HOME/.config/nix-darwin#macbook-air"
+
+# 3. Install mise-managed tools.
 if command -v mise >/dev/null 2>&1; then
   mise install
 fi
