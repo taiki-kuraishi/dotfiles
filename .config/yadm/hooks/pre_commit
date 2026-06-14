@@ -1,17 +1,36 @@
 #!/usr/bin/env bash
-# yadm commit の前に、ステージ済みの .nix を nixfmt で整形して再ステージする
+# yadm commit の前に、ステージ済みファイルを整形して再ステージする
+#   .nix             -> nixfmt
+#   .json/.yml/.yaml -> dprint（json + pretty_yaml プラグイン）
 set -euo pipefail
 
 # yadm フック実行中は GIT_DIR が yadm リポを指すので、git コマンドはそのまま yadm リポに作用する
-staged_nix=$(git diff --cached --name-only --diff-filter=ACM -- '*.nix')
-[ -z "$staged_nix" ] && exit 0
 
-# nixfmt は systemPackages 導入後に使用可。未導入でも nix run で動く
-fmt() { command -v nixfmt >/dev/null 2>&1 && nixfmt "$@" || nix run nixpkgs#nixfmt -- "$@"; }
+# nixfmt / dprint は systemPackages 導入後に使用可。未導入でも nix run で動く
+nixfmt_run() { command -v nixfmt >/dev/null 2>&1 && nixfmt "$@" || nix run nixpkgs#nixfmt -- "$@"; }
+dprint_run() { command -v dprint >/dev/null 2>&1 && dprint "$@" || nix run nixpkgs#dprint -- "$@"; }
 
-while IFS= read -r f; do
-  abs="$HOME/$f"          # yadm の作業ツリーは $HOME
-  [ -f "$abs" ] || continue
-  fmt "$abs"
-  git add -- "$f"         # 整形結果をコミットに含める
-done <<< "$staged_nix"
+DPRINT_CONFIG="$HOME/.config/dprint/dprint.json"
+
+# ステージ済みファイルを絶対パス配列で取得（yadm の作業ツリーは $HOME）
+staged_abs() {
+  local f
+  while IFS= read -r f; do
+    [ -n "$f" ] && [ -f "$HOME/$f" ] && printf '%s\0' "$HOME/$f"
+  done < <(git diff --cached --name-only --diff-filter=ACM -- "$@")
+}
+
+# --- .nix （nixfmt） ----------------------------------------------------
+mapfile -d '' -t nix_files < <(staged_abs '*.nix')
+if [ "${#nix_files[@]}" -gt 0 ]; then
+  nixfmt_run "${nix_files[@]}"
+  git add -- "${nix_files[@]}"
+fi
+
+# --- .json / .yml / .yaml （dprint） -------------------------------------
+# dprint は自身の設定ファイルを整形対象外にするため --allow-no-files で許容
+mapfile -d '' -t dprint_files < <(staged_abs '*.json' '*.yml' '*.yaml')
+if [ "${#dprint_files[@]}" -gt 0 ]; then
+  dprint_run fmt --allow-no-files --config "$DPRINT_CONFIG" "${dprint_files[@]}"
+  git add -- "${dprint_files[@]}"
+fi

@@ -5,6 +5,7 @@
     pkgs.starship
     pkgs.git
     pkgs.nixfmt
+    pkgs.dprint
   ];
   programs.zsh.enable = true;
   programs.zsh.promptInit = ''

@@ -48,11 +48,15 @@
     "provider": "none",
   },
   "ui_font_family": "JetBrains Mono",
-  "icon_theme": "Catppuccin Mocha",
+  "icon_theme": {
+    "mode": "light",
+    "light": "Catppuccin Mocha",
+    "dark": "Catppuccin Mocha"
+  },
   "ui_font_size": 16,
   "buffer_font_size": 14.0,
   "theme": {
-    "mode": "system",
+    "mode": "dark",
     "light": "One Light",
     "dark": "Catppuccin Mocha",
   },
