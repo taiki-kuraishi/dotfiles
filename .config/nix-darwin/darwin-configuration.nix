@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, hostName, username, ... }: {
   nix.settings.experimental-features = "nix-command flakes";
   environment.systemPackages = [
     pkgs.vim
@@ -19,9 +19,9 @@
     eval "$(mise activate zsh)"
   '';
   system.stateVersion = 5;
-  networking.hostName = "macbook-air";
+  networking.hostName = hostName;
   nixpkgs.hostPlatform = "aarch64-darwin";
-  system.primaryUser = "kuraishi";
+  system.primaryUser = username;
 
   # ---------------------------------------------------------------------
   # macOS のシステム設定（defaults write の代わり）

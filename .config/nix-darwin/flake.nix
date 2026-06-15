@@ -13,9 +13,26 @@
       nix-darwin,
       nixpkgs,
     }:
+    let
+      # ホスト固有の値（ユーザー名・ホスト名）はここだけに集約する。
+      # 設定本体（darwin-configuration.nix）はジェネリックに保つ。
+      mkSystem =
+        { hostName, username }:
+        nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit hostName username; };
+          modules = [ ./darwin-configuration.nix ];
+        };
+    in
     {
-      darwinConfigurations."macbook-air" = nix-darwin.lib.darwinSystem {
-        modules = [ ./darwin-configuration.nix ];
+      darwinConfigurations = {
+        "macbook-air" = mkSystem {
+          hostName = "macbook-air";
+          username = "kuraishi";
+        };
+        "RN2162" = mkSystem {
+          hostName = "RN2162";
+          username = "t_kuraishi";
+        };
       };
 
       # nix fmt で nixfmt（公式フォーマッタ）が走るようにする
