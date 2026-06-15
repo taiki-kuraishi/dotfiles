@@ -19,11 +19,15 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 
 # 2. Apply nix-darwin.
-#    The Nix installer writes /etc/nix/nix.conf, which conflicts with nix-darwin's
-#    own management of that file on first activation; move it aside if present.
-if [ -f /etc/nix/nix.conf ] && [ ! -e /etc/nix/nix.conf.before-nix-darwin ]; then
-  sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.before-nix-darwin
-fi
+#    The Nix installer writes /etc/nix/nix.conf and appends to the shell rc
+#    files; nix-darwin manages all of these and refuses to overwrite content it
+#    doesn't recognize on first activation. Move them aside (the originals are
+#    preserved as *.before-nix-darwin) so nix-darwin can take over.
+for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc; do
+  if [ -f "$f" ] && [ ! -e "$f.before-nix-darwin" ]; then
+    sudo mv "$f" "$f.before-nix-darwin"
+  fi
+done
 # Use the flake-based first-run form (works before darwin-rebuild is on PATH).
 # `env PATH=$PATH` keeps nix on root's PATH under sudo.
 # Upstream Nix has flakes/nix-command off by default, so enable them for this
