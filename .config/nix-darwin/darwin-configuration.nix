@@ -1,4 +1,10 @@
-{ pkgs, hostName, username, ... }: {
+{
+  pkgs,
+  hostName,
+  username,
+  ...
+}:
+{
   nix.settings.experimental-features = "nix-command flakes";
   environment.systemPackages = [
     pkgs.vim
@@ -18,6 +24,15 @@
   programs.zsh.interactiveShellInit = ''
     eval "$(mise activate zsh)"
   '';
+
+  # シェルエイリアス（bash/zsh 共通）
+  environment.shellAliases = {
+    g = "git";
+    do = "docker";
+    doc = "docker compose";
+    mtr = "mise tasks run";
+  };
+
   system.stateVersion = 5;
   networking.hostName = hostName;
   nixpkgs.hostPlatform = "aarch64-darwin";
