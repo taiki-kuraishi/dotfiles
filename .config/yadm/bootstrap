@@ -2,9 +2,15 @@
 # yadm bootstrap: provision a fresh machine after `yadm clone`.
 set -e
 
-# 1. Install Nix (Determinate Systems installer) if missing.
+# 1. Install upstream (official) Nix if missing, so nix-darwin can manage Nix
+#    natively (the Determinate distribution ships its own daemon that conflicts
+#    with nix-darwin). The official installer is interactive on macOS, so run it
+#    from a file rather than `curl | sh` to keep the terminal on stdin.
 if ! command -v nix >/dev/null 2>&1; then
-  curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
+  installer="$(mktemp)"
+  curl --proto '=https' --tlsv1.2 -fsSL https://nixos.org/nix/install -o "$installer"
+  sh "$installer" --daemon
+  rm -f "$installer"
 fi
 
 # Make nix available in this (non-login) shell.
