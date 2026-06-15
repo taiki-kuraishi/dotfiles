@@ -26,10 +26,14 @@ if [ -f /etc/nix/nix.conf ] && [ ! -e /etc/nix/nix.conf.before-nix-darwin ]; the
 fi
 # Use the flake-based first-run form (works before darwin-rebuild is on PATH).
 # `env PATH=$PATH` keeps nix on root's PATH under sudo.
+# Upstream Nix has flakes/nix-command off by default, so enable them for this
+# bootstrap run; nix-darwin's nix.settings.experimental-features makes them
+# permanent after the first activation.
 # Select the darwinConfiguration by this machine's hostname; it must be
 # registered in flake.nix (darwinConfigurations.<hostname>).
 HOSTNAME="$(scutil --get LocalHostName)"
-sudo env "PATH=$PATH" nix run nix-darwin/master#darwin-rebuild -- \
+sudo env "PATH=$PATH" nix --extra-experimental-features 'nix-command flakes' \
+  run nix-darwin/master#darwin-rebuild -- \
   switch --flake "$HOME/.config/nix-darwin#$HOSTNAME"
 
 # 3. Install mise-managed tools.
