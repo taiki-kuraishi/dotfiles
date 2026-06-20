@@ -10,12 +10,12 @@
 
 1. clone
 
-```sh
-yadm clone https://github.com/taiki-kuraishi/dotfiles.git
-```
+    ```sh
+    yadm clone https://github.com/taiki-kuraishi/dotfiles.git
+    ```
 
 1. install
 
-```sh
-yadm bootstrap
-```
+    ```sh
+    yadm bootstrap
+    ```
