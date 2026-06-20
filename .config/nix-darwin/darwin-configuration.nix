@@ -23,6 +23,13 @@
   '';
   programs.zsh.interactiveShellInit = ''
     eval "$(mise activate zsh)"
+
+    # bun / npm / pnpm の補完（mise でツールが PATH に入った後に生成）
+    # pnpm は compdef を使うため、先に補完システムを初期化しておく
+    autoload -Uz compinit && compinit
+    command -v npm  >/dev/null && source <(npm completion)
+    command -v pnpm >/dev/null && source <(pnpm completion zsh)
+    command -v bun  >/dev/null && source <(bun completions)
   '';
 
   # シェルエイリアス（bash/zsh 共通）
