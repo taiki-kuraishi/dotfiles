@@ -38,7 +38,7 @@
 	lg = log --graph --decorate --abbrev-commit --format=format:'%C(blue)%h%C(reset) - %C(green)(%ar)%C(reset)%C(yellow)%d%C(reset)\n  %C(white)%s%C(reset) %C(dim white)- %an%C(reset)'
 	empty-commit = commit --allow-empty -m "empty commit"
 [ghq]
-	root = ~/Documents/GitHub
+	root = ~/Documents/ghq
 [credential "https://github.com"]
 	helper = 
 	helper = !/opt/homebrew/bin/gh auth git-credential
