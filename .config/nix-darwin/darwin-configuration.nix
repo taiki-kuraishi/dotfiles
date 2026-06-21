@@ -72,6 +72,7 @@
       "gh"
       "ghq"
       "yadm"
+      "cloudflared"
     ];
   };
 }
