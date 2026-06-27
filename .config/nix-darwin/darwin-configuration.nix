@@ -66,6 +66,7 @@
       "google-chrome"
       "zed"
       "raycast"
+      "orbstack"
     ];
     brews = [
       "mise"
