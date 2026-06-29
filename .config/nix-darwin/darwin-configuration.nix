@@ -32,6 +32,12 @@
     command -v bun  >/dev/null && source <(bun completions)
   '';
 
+  # 環境変数
+  environment.variables = {
+    # sops が使う age 復号鍵のパス（age のデフォルト保存先）
+    SOPS_AGE_KEYFILE = "$HOME/.config/sops/age/keys.txt";
+  };
+
   # シェルエイリアス（bash/zsh 共通）
   environment.shellAliases = {
     g = "git";
