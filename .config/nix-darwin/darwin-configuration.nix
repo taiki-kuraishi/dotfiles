@@ -18,7 +18,7 @@
     eval "$(starship init zsh)"
   '';
   programs.zsh.shellInit = ''
-    export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+    export PATH="/Users/kuraishi/.opencode/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH"
     fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
   '';
   programs.zsh.interactiveShellInit = ''
@@ -30,6 +30,9 @@
     command -v npm  >/dev/null && source <(npm completion)
     command -v pnpm >/dev/null && source <(pnpm completion zsh)
     command -v bun  >/dev/null && source <(bun completions)
+
+    # Added by OrbStack: command-line tools and integration
+    source ~/.orbstack/shell/init.zsh 2>/dev/null || :
   '';
 
   # 環境変数
