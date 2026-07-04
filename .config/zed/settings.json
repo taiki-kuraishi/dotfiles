@@ -22,6 +22,7 @@
     "dock": "left"
   },
   "agent": {
+    "terminal_init_command": "",
     "dock": "right",
     "favorite_models": [],
     "model_parameters": []
@@ -68,6 +69,7 @@
   "show_whitespaces": "all",
   "format_on_save": "on",
   "terminal": {
+    "dock": "bottom",
     "font_family": "0xProto Nerd Font",
     "font_size": 14,
     "line_height": "standard",
