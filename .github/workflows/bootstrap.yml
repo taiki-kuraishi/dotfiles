@@ -1,0 +1,81 @@
+name: bootstrap
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 0 * * 1" # 毎週月曜 00:00 UTC（上流変化での破綻検知）
+
+concurrency:
+  group: bootstrap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    runs-on: macos-15 # arm64 = aarch64-darwin（flake の hostPlatform に一致）
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # file:// clone で確実に対象コミットを展開するため全履歴
+
+      # 前提① nix（公式/upstream 版）を導入。Determinate デーモンは nix-darwin と競合するため無効化
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: false
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      # 前提② yadm を導入（Homebrew はランナーにプリインストール済み＝前提③を満たす）
+      - name: Install yadm
+        run: brew install yadm
+
+      # flake の darwinConfigurations.ci-runner を選択させる
+      - name: Set CI host identity
+        run: sudo scutil --set LocalHostName ci-runner
+
+      # チェックアウトしたこのコミットを yadm 管理下($HOME)へ展開
+      - name: Seed yadm repo from checkout
+        run: |
+          set -eux
+          head_sha=$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)
+          yadm clone -f --no-bootstrap "file://$GITHUB_WORKSPACE/.git"
+          yadm reset --hard "$head_sha"
+          yadm alt # ##os.Darwin の alternates(bootstrap シンボリックリンク等)を実体化
+
+      # 本番の bootstrap を実行（nix-darwin switch まで）。非ゼロ終了で CI 失敗
+      - name: Run yadm bootstrap
+        run: yadm bootstrap
+
+      # 導入結果の簡易確認（失敗しても本体判定は上の step で済んでいるので tolerant）
+      - name: Verify toolchain
+        run: |
+          set -x
+          export PATH="/opt/homebrew/bin:/run/current-system/sw/bin:$PATH"
+          darwin-rebuild --version || true
+          for c in nix yadm gh mise cloudflared; do command -v "$c" || true; done
+
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yadm
+        run: sudo apt-get update && sudo apt-get install -y yadm
+
+      - name: Seed yadm repo from checkout
+        run: |
+          set -eux
+          head_sha=$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)
+          yadm clone -f --no-bootstrap "file://$GITHUB_WORKSPACE/.git"
+          yadm reset --hard "$head_sha"
+          yadm alt # ##os.Linux の alternates を実体化
+
+      # Linux bootstrap は非対話(mise install --yes)・sudo 不要。exit code で判定
+      - name: Run yadm bootstrap
+        run: yadm bootstrap

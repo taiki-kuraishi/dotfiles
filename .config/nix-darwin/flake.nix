@@ -33,6 +33,11 @@
           hostName = "RN2162";
           username = "t_kuraishi";
         };
+        # GitHub Actions ランナー用（bootstrap 検証 CI）。実ユーザー runner に合わせる。
+        "ci-runner" = mkSystem {
+          hostName = "ci-runner";
+          username = "runner";
+        };
       };
 
       # nix fmt で nixfmt（公式フォーマッタ）が走るようにする
