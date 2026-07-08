@@ -1,0 +1,25 @@
+# Linux (roppoh リモート開発 Pod) 用 zshrc。
+# macOS ではシェル設定を nix-darwin が生成するため、このファイルは Linux でのみ実体化される(yadm alternates)。
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# プロンプト(starship は Pod イメージに同梱)
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+# mise
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+
+# 補完(nix-darwin の interactiveShellInit と同等)
+autoload -Uz compinit && compinit
+command -v npm  >/dev/null && source <(npm completion)
+command -v pnpm >/dev/null && source <(pnpm completion zsh)
+command -v bun  >/dev/null && source <(bun completions)
+
+# エイリアス(nix-darwin の environment.shellAliases から移植)
+alias g="git"
+alias mtr="mise tasks run"
+
+# gh を GitHub App の短命トークンで動かす(gh-app-token は Pod にのみ存在)
+if command -v gh-app-token >/dev/null 2>&1; then
+  gh() { GH_TOKEN="$(gh-app-token)" command gh "$@"; }
+fi
