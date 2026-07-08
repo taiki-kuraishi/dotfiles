@@ -1,0 +1,21 @@
+#!/bin/sh
+# yadm bootstrap (Linux): roppoh リモート開発 Pod など Linux 環境の初期化。
+# macOS 側は bootstrap##os.Darwin(nix-darwin ベース)で、本ファイルとは独立。
+set -e
+
+# 1. mise(Pod イメージに同梱されている想定。素の Linux でも動くよう防御的に導入)
+if ! command -v mise >/dev/null 2>&1; then
+  curl -fsSL https://mise.run | sh
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# 2. mise 管理ツール(~/.config/mise/config.toml に従う)
+mise install --yes
+
+# 3. Claude Code(ネイティブバイナリ。~/.local 配下に入り、以後は自己更新される)
+if [ ! -x "$HOME/.local/bin/claude" ]; then
+  curl -fsSL https://claude.ai/install.sh | bash
+fi
+
+# 4. npx skills の復元(node は mise で導入済み。Darwin bootstrap の手順 4 と同等)
+mise x -- npx skills experimental_install
