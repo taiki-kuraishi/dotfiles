@@ -12,6 +12,7 @@
     pkgs.git
     pkgs.nixfmt
     pkgs.dprint
+    pkgs.nixd
   ];
   programs.zsh.enable = true;
   programs.zsh.promptInit = ''
@@ -75,12 +76,10 @@
       "google-chrome"
       "zed"
       "raycast"
-      "orbstack"
     ];
     brews = [
       "mise"
       "gh"
-      "ghq"
       "yadm"
       "cloudflared"
     ];
