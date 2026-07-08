@@ -8,6 +8,41 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  // スキャン除外設定(デフォルト値を上書きするため、先頭にデフォルト分も含めている)
+  // ~/ を開いたときに重くなる原因の Library やキャッシュ類を除外する
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/Library",
+    "**/node_modules",
+    "**/.cache",
+    "**/.npm",
+    "**/.cargo/registry",
+    "**/.rustup",
+    "**/.gradle",
+    "**/.m2",
+    "**/.venv",
+    "**/venv",
+    "**/.Trash",
+    "**/Pictures/Photos Library.photoslibrary",
+    "**/Movies",
+    "**/Music",
+    "**/Applications"
+  ],
+  "ssh_connections": [
+    {
+      "host": "n100.tsar-bmb.org",
+      "args": [],
+      "projects": []
+    }
+  ],
   "session": {
     "trust_all_worktrees": true
   },
