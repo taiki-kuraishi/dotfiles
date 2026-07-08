@@ -36,6 +36,11 @@ jobs:
       - name: Set CI host identity
         run: sudo scutil --set LocalHostName ci-runner
 
+      # Determinate 版インストーラが作る /etc/nix/nix.custom.conf を退避（nix-darwin が
+      # 見覚えのない custom 設定を検出すると activation を中断するため）。
+      - name: Move aside Determinate custom nix.conf (nix-darwin takeover)
+        run: sudo mv /etc/nix/nix.custom.conf /etc/nix/nix.custom.conf.before-nix-darwin 2>/dev/null || true
+
       # チェックアウトしたこのコミットを yadm 管理下($HOME)へ展開
       - name: Seed yadm repo from checkout
         run: |
@@ -50,16 +55,17 @@ jobs:
         run: yadm bootstrap
 
       # 導入結果の簡易確認（失敗しても本体判定は上の step で済んでいるので tolerant）
+      # gh/mise/cloudflared は Home Manager(nix) 側に移動したので HM プロファイルも PATH に含める。
       - name: Verify toolchain
         run: |
           set -x
-          export PATH="/opt/homebrew/bin:/run/current-system/sw/bin:$PATH"
+          export PATH="/opt/homebrew/bin:/run/current-system/sw/bin:/etc/profiles/per-user/runner/bin:$HOME/.nix-profile/bin:$PATH"
           darwin-rebuild --version || true
-          for c in nix yadm gh mise cloudflared; do command -v "$c" || true; done
+          for c in nix yadm gh mise cloudflared starship; do command -v "$c" || true; done
 
   linux:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40 # nix 導入 + Home Manager ビルドの分だけ余裕を持たせる
     steps:
       - uses: actions/checkout@v4
         with:
