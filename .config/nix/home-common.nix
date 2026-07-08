@@ -24,6 +24,14 @@
     cloudflared
     mise
     gh
+    ripgrep
+    tmux
+    ghq
+    # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
+    # （例: better-sqlite3 の node-gyp フォールバック）用の最低限のツールチェイン。
+    gcc
+    gnumake
+    python3
   ];
 
   # 環境変数
