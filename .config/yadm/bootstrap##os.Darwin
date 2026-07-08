@@ -38,7 +38,7 @@ done
 HOSTNAME="$(scutil --get LocalHostName)"
 sudo env "PATH=$PATH" nix --extra-experimental-features 'nix-command flakes' \
   run nix-darwin/master#darwin-rebuild -- \
-  switch --flake "$HOME/.config/nix-darwin#$HOSTNAME"
+  switch --flake "$HOME/.config/nix#$HOSTNAME"
 
 # 3. Install mise-managed tools.
 if command -v mise >/dev/null 2>&1; then
