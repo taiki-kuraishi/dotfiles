@@ -44,9 +44,5 @@
       "zed"
       "raycast"
     ];
-    # yadm は bootstrap の前提（先に存在する必要がある）ため Homebrew 管理のまま残す。
-    brews = [
-      "yadm"
-    ];
   };
 }
