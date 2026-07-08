@@ -44,3 +44,8 @@ sudo env "PATH=$PATH" nix --extra-experimental-features 'nix-command flakes' \
 if command -v mise >/dev/null 2>&1; then
   mise install
 fi
+
+# 4. Restore npx skills (https://github.com/vercel-labs/skills) from ~/.agents/.skill-lock.json.
+if command -v npx >/dev/null 2>&1; then
+  npx skills experimental_install
+fi
