@@ -36,7 +36,9 @@ done
 # Select the darwinConfiguration by this machine's hostname; it must be
 # registered in flake.nix (darwinConfigurations.<hostname>).
 HOSTNAME="$(scutil --get LocalHostName)"
-sudo env "PATH=$PATH" nix --extra-experimental-features 'nix-command flakes' \
+# sudo はデフォルトで環境変数をリセットするため、CI 側で GitHub API のレート制限回避に
+# 使う NIX_CONFIG (access-tokens) を明示的に引き渡す(ローカル実行時は未設定=空でよい)。
+sudo env "PATH=$PATH" "NIX_CONFIG=${NIX_CONFIG:-}" nix --extra-experimental-features 'nix-command flakes' \
   run nix-darwin/master#darwin-rebuild -- \
   switch --flake "$HOME/.config/nix#$HOSTNAME"
 
