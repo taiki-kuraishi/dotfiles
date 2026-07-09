@@ -51,7 +51,12 @@ jobs:
           yadm alt # ##os.Darwin の alternates(bootstrap シンボリックリンク等)を実体化
 
       # 本番の bootstrap を実行（nix-darwin switch まで）。非ゼロ終了で CI 失敗
+      # bootstrap 内で `nix run nix-darwin/master#darwin-rebuild` が未ピン留めの
+      # flake 参照を解決するたびに api.github.com を未認証で叩くため、Actions ランナー
+      # の共有 IP だと rate limit (60 req/h) に達しやすい。GITHUB_TOKEN で認証させる。
       - name: Run yadm bootstrap
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
         run: yadm bootstrap
 
       # 導入結果の簡易確認（失敗しても本体判定は上の step で済んでいるので tolerant）
@@ -83,5 +88,9 @@ jobs:
           yadm alt # ##os.Linux の alternates を実体化
 
       # Linux bootstrap は非対話(mise install --yes)・sudo 不要。exit code で判定
+      # macos 側と同様、bootstrap 内の `nix run github:nix-community/home-manager`
+      # も未ピン留めの flake 参照で api.github.com を未認証で叩くため、GITHUB_TOKEN で認証させる。
       - name: Run yadm bootstrap
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
         run: yadm bootstrap
