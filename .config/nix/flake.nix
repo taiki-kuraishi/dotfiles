@@ -75,12 +75,12 @@
       # Linux（roppoh Pod / GitHub Actions linux job）。
       # 名前は <user>-<system> でアーキを区別し、bootstrap が uname -m で選択する。
       homeConfigurations = {
-        "claude-x86_64-linux" = mkHome {
-          username = "claude";
+        "user-x86_64-linux" = mkHome {
+          username = "user";
           system = "x86_64-linux";
         };
-        "claude-aarch64-linux" = mkHome {
-          username = "claude";
+        "user-aarch64-linux" = mkHome {
+          username = "user";
           system = "aarch64-linux";
         };
         "runner-x86_64-linux" = mkHome {
