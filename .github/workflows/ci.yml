@@ -1,0 +1,107 @@
+name: ci
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: false
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      # yadm の pre_commit フックと同じコマンド（nixfmt）で、整形済みかを確認する
+      - name: nixfmt --check
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+        run: nix run nixpkgs#nixfmt -- --check $(git ls-files '*.nix')
+
+      # yadm の pre_commit フックと同じコマンド（dprint）で、整形済みかを確認する。
+      # karabiner.json 等 GUI アプリが書き換えるファイルは dprint.json 側の excludes で除外済み。
+      - name: dprint check
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+        run: |
+          nix run nixpkgs#dprint -- check \
+            --config .config/dprint/dprint.json \
+            $(git ls-files '*.json' '*.yml' '*.yaml')
+
+  flake-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: .config/nix
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: false
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: nix flake check
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+        run: nix flake check
+
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: .config/nix
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: darwin
+            name: macbook-air
+          - kind: darwin
+            name: RN2162
+          - kind: darwin
+            name: ci-runner
+          - kind: home
+            name: user-x86_64-linux
+          - kind: home
+            name: user-aarch64-linux
+          - kind: home
+            name: runner-x86_64-linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: false
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      # flake.lock は commit 済みのためビルドはしない（実機 aarch64-darwin 不要）。
+      # evaluate だけで config 全体（home-manager の zsh モジュールのバグのような
+      # option 未定義エラーを含む）が踏めるので、bootstrap.yml が実行しない
+      # macbook-air / RN2162 / user-*-linux もここで検知できる。
+      - name: Evaluate darwinConfigurations.${{ matrix.name }}
+        if: matrix.kind == 'darwin'
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+        run: nix eval ".#darwinConfigurations.${{ matrix.name }}.config.system.build.toplevel.drvPath"
+
+      - name: Evaluate homeConfigurations.${{ matrix.name }}
+        if: matrix.kind == 'home'
+        env:
+          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+        run: nix eval ".#homeConfigurations.\"${{ matrix.name }}\".activationPackage.drvPath"
