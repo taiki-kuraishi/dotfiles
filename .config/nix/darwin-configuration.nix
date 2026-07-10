@@ -40,7 +40,6 @@
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
     casks = [
-      "google-chrome"
       "zed"
       "raycast"
     ];

@@ -16,7 +16,7 @@
 
   # ユーザーパッケージ（両 OS 共通）
   home.packages = with pkgs; [
-    vim
+    neovim
     git
     nixfmt
     dprint
@@ -38,6 +38,7 @@
   home.sessionVariables = {
     # sops が使う age 復号鍵のパス（age のデフォルト保存先）
     SOPS_AGE_KEYFILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+    GOOGLE_CLOUD_PROJECT = "gen-lang-client-0186675745";
   };
 
   # PATH（.local/bin は共通。opencode / homebrew は macOS のみ）
@@ -63,6 +64,7 @@
     initContent = ''
       # mise アクティベート（ツールは ~/.config/mise/config.toml + `mise install` で管理）
       command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+      command -v task >/dev/null 2>&1 && eval "$(task --completion zsh)"
 
       # bun / npm / pnpm の補完（mise でツールが PATH に入った後に読み込む）
       command -v npm  >/dev/null && source <(npm completion)
