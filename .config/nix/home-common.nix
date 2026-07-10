@@ -92,4 +92,9 @@
       fi
     '';
   };
+
+  # programs.zsh が生成する .zshrc / .zprofile は HM 管理外の既存ファイルと衝突しやすい。
+  # バックアップせず常に強制上書きする（内容は home-common.nix が単一の情報源）。
+  home.file.".zshrc".force = true;
+  home.file.".zprofile".force = true;
 }

@@ -39,9 +39,6 @@
     enable = true;
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
-    casks = [
-      "zed"
-      "raycast"
-    ];
+    casks = [ ];
   };
 }
