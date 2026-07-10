@@ -16,9 +16,36 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/vercel-labs/skills.git",
       "skillPath": "skills/find-skills/SKILL.md",
-      "skillFolderHash": "3013fdeb8a11b10b1eb795ec3ae8bfca38f7c26d",
+      "skillFolderHash": "eb6a23305aea6e340d14b9de3766e721f9f4861b",
       "installedAt": "2026-06-16T07:02:20.722Z",
-      "updatedAt": "2026-06-16T07:02:20.722Z"
+      "updatedAt": "2026-07-10T00:25:44.712Z"
+    },
+    "orca-cli": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/stablyai/orca.git",
+      "skillPath": "skills/orca-cli/SKILL.md",
+      "skillFolderHash": "d1175a5a5807a6783a3d896f720645b39f736dbb",
+      "installedAt": "2026-07-09T03:04:35.106Z",
+      "updatedAt": "2026-07-09T07:03:29.646Z"
+    },
+    "computer-use": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/stablyai/orca.git",
+      "skillPath": "skills/computer-use/SKILL.md",
+      "skillFolderHash": "b3fb19187d9775774df2a93d59e9e0003093e4a2",
+      "installedAt": "2026-07-09T07:03:29.644Z",
+      "updatedAt": "2026-07-09T07:03:29.644Z"
+    },
+    "orchestration": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/stablyai/orca.git",
+      "skillPath": "skills/orchestration/SKILL.md",
+      "skillFolderHash": "189912ad39f48b0a71f1cf0ee87abfcd55f90716",
+      "installedAt": "2026-07-09T07:03:29.649Z",
+      "updatedAt": "2026-07-09T07:03:29.649Z"
     }
   },
   "dismissed": {
@@ -37,6 +64,7 @@
     "kimi-code-cli",
     "opencode",
     "warp",
-    "zed"
+    "zed",
+    "claude-code"
   ]
 }
