@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run claude skipping permissions"
+set -euo pipefail
+exec claude --allow-dangerously-skip-permissions "$@"

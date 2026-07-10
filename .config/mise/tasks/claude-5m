@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Run claude with 5m prompt caching, skipping permissions"
+set -euo pipefail
+export FORCE_PROMPT_CACHING_5M=1
+exec claude --allow-dangerously-skip-permissions "$@"
