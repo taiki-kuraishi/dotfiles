@@ -34,6 +34,7 @@
     # docker CLI クライアント。デーモンは nix/HM では管理せず外部が提供する
     # （macOS: OrbStack / Dory 等、Linux: Pod 側）。
     docker
+    kubectl
     # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
     # （例: better-sqlite3 の node-gyp フォールバック）用の最低限のツールチェイン。
     gcc
