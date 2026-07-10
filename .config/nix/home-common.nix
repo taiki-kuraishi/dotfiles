@@ -25,6 +25,10 @@
     mise
     gh
     ripgrep
+    fd
+    fzf
+    lazygit
+    tree-sitter
     tmux
     ghq
     # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
