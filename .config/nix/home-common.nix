@@ -94,7 +94,13 @@
   };
 
   # programs.zsh が生成する .zshrc / .zprofile は HM 管理外の既存ファイルと衝突しやすい。
-  # バックアップせず常に強制上書きする（内容は home-common.nix が単一の情報源）。
-  home.file.".zshrc".force = true;
-  home.file.".zprofile".force = true;
+  # かつては home.file.".zshrc".force = true; で個別に強制上書きしていたが、
+  # home-manager の zsh モジュール側のバグ（dotDir がホームディレクトリと同じ場合、
+  # 内部で home.file キーが "./.zshrc" になり ".zshrc" とマージされない。
+  # nix-community/home-manager commit 5432dc5bc4a0 で混入、2026-07 時点で master でも未修正）
+  # により force が効かず home-manager.users.<user>.home.file.".zshrc".source が
+  # 未定義のまま参照されて評価エラーになっていた。
+  # 衝突時の強制上書きは個別ファイルではなく darwin-configuration.nix /
+  # flake.nix 側の home-manager.backupFileExtension で一括対応する
+  # （内部キー名に依存しないため upstream のこのバグの影響を受けない）。
 }

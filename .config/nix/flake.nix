@@ -33,6 +33,13 @@
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = { inherit hostName username; };
               home-manager.users.${username} = import ./home-common.nix;
+              # HM 管理外の既存ファイル（初回の .zshrc / .zprofile 等）と衝突した場合、
+              # activation を失敗させず *.backup に退避して上書きする。
+              # 個別ファイルの home.file.<name>.force ではなくこちらで一括対応する理由は
+              # home-common.nix のコメントを参照。
+              home-manager.backupFileExtension = "backup";
+              # 2 回目以降の bootstrap で *.backup が既に存在していても失敗させない。
+              home-manager.overwriteBackup = true;
             }
           ];
         };
