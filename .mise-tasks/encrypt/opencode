@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#MISE description="Encrypt opencode.jsonc"
+
+# Ensure we are using the correct file path
+TARGET_FILE="/Users/kuraishi/.config/opencode/opencode.jsonc"
+OUTPUT_FILE="${TARGET_FILE}.sops.yaml"
+AGE_RECIPIENT="age1wref3z28crtwtmd5h570vlrutrrd53r2rdyztaklr5zqwc7kf3msdrjp56"
+
+# Check if source file exists
+if [ ! -f "$TARGET_FILE" ]; then
+    echo "Error: $TARGET_FILE does not exist."
+    exit 1
+fi
+
+# Encrypt the file
+echo "Encrypting $TARGET_FILE to $OUTPUT_FILE..."
+sops --encrypt --age "$AGE_RECIPIENT" --input-type json "$TARGET_FILE" > "$OUTPUT_FILE"
+
+if [ $? -eq 0 ]; then
+    echo "Successfully encrypted $TARGET_FILE"
+else
+    echo "Encryption failed."
+    exit 1
+fi

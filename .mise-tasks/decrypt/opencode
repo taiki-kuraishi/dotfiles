@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#MISE description="Decrypt opencode.jsonc"
+
+# Ensure we are using the correct file path
+TARGET_FILE="/Users/kuraishi/.config/opencode/opencode.jsonc"
+SOURCE_FILE="${TARGET_FILE}.sops.yaml"
+
+# Check if source file exists
+if [ ! -f "$SOURCE_FILE" ]; then
+    echo "Error: $SOURCE_FILE does not exist."
+    exit 1
+fi
+
+# Decrypt the file
+echo "Decrypting $SOURCE_FILE to $TARGET_FILE..."
+sops --decrypt --output-type json "$SOURCE_FILE" > "$TARGET_FILE"
+
+if [ $? -eq 0 ]; then
+    echo "Successfully decrypted $TARGET_FILE"
+else
+    echo "Decryption failed."
+    exit 1
+fi
