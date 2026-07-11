@@ -4,32 +4,7 @@
 # 両 OS 共通の Home Manager モジュール(~/.config/nix/home-common.nix)で統一している。
 set -e
 
-# 1. Nix 導入（未導入時）。Determinate インストーラ（非対話 --no-confirm）。
-#    ※ Linux は nix-darwin と競合しないので Determinate 版で問題ない。
-#    - systemd あり(CI ubuntu 等): 通常のマルチユーザー導入。daemon を systemd が起動するので
-#      非 root ユーザーでも nix が使える。
-#    - systemd なし(Pod/コンテナ): --init none + sandbox=false。daemon が自動起動しないため、
-#      非 root ユーザー向けに daemon を手動起動する（root ユーザーなら不要）。
-if ! command -v nix >/dev/null 2>&1; then
-  if [ -d /run/systemd/system ]; then
-    curl --proto '=https' --tlsv1.2 -fsSL https://install.determinate.systems/nix \
-      | sh -s -- install linux --no-confirm
-  else
-    curl --proto '=https' --tlsv1.2 -fsSL https://install.determinate.systems/nix \
-      | sh -s -- install linux --no-confirm --init none --extra-conf "sandbox = false"
-    # no-systemd では daemon が自動起動しないので、非 root ユーザーが nix を使えるよう起動を試みる。
-    if [ "$(id -u)" != 0 ] && [ ! -S /nix/var/nix/daemon-socket/socket ]; then
-      sudo nohup /nix/var/nix/profiles/default/bin/nix-daemon >/tmp/nix-daemon.log 2>&1 &
-      sleep 2
-    fi
-  fi
-fi
-
-# 2. Nix をこのシェルで有効化。
-. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 2>/dev/null \
-  || . "$HOME/.nix-profile/etc/profile.d/nix.sh" 2>/dev/null || :
-
-# 3. CPU アーキから該当の homeConfigurations を選択。
+# 1. CPU アーキから該当の homeConfigurations を選択。
 case "$(uname -m)" in
   x86_64 | amd64) sys=x86_64-linux ;;
   aarch64 | arm64) sys=aarch64-linux ;;
@@ -39,21 +14,21 @@ case "$(uname -m)" in
     ;;
 esac
 
-# 4. Home Manager を適用（home-common.nix）。
+# 2. Home Manager を適用（home-common.nix）。
 #    -b backup: Pod イメージ同梱の ~/.zshrc 等があっても衝突せず退避する。
 nix run github:nix-community/home-manager -- \
   switch -b backup --flake "$HOME/.config/nix#$(whoami)-$sys"
 
-# 5. HM 導入物をこのシェルの PATH へ（mise/claude を同一実行内で使えるように）。
+# 3. HM 導入物をこのシェルの PATH へ（mise/claude を同一実行内で使えるように）。
 export PATH="$HOME/.nix-profile/bin:$PATH"
 
-# 6. mise 管理ツール（~/.config/mise/config.toml に従う。mise 本体は HM 導入済み）。
+# 4. mise 管理ツール（~/.config/mise/config.toml に従う。mise 本体は HM 導入済み）。
 mise install --yes
 
-# 7. Claude Code(ネイティブバイナリ。~/.local 配下に入り、以後は自己更新される)。
+# 5. Claude Code(ネイティブバイナリ。~/.local 配下に入り、以後は自己更新される)。
 if [ ! -x "$HOME/.local/bin/claude" ]; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
 
-# 8. npx skills の復元(node は mise で導入済み。Darwin bootstrap の手順 4 と同等)。
+# 6. npx skills の復元(node は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
 mise x -- npx skills experimental_install

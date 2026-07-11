@@ -2,23 +2,7 @@
 # yadm bootstrap: provision a fresh machine after `yadm clone`.
 set -e
 
-# 1. Install upstream (official) Nix if missing, so nix-darwin can manage Nix
-#    natively (the Determinate distribution ships its own daemon that conflicts
-#    with nix-darwin). The official installer is interactive on macOS, so run it
-#    from a file rather than `curl | sh` to keep the terminal on stdin.
-if ! command -v nix >/dev/null 2>&1; then
-  installer="$(mktemp)"
-  curl --proto '=https' --tlsv1.2 -fsSL https://nixos.org/nix/install -o "$installer"
-  sh "$installer" --daemon
-  rm -f "$installer"
-fi
-
-# Make nix available in this (non-login) shell.
-if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
-  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-fi
-
-# 2. Apply nix-darwin.
+# 1. Apply nix-darwin.
 #    The Nix installer writes /etc/nix/nix.conf and appends to the shell rc
 #    files; nix-darwin manages all of these and refuses to overwrite content it
 #    doesn't recognize on first activation. Move them aside (the originals are
@@ -42,12 +26,12 @@ sudo env "PATH=$PATH" "NIX_CONFIG=${NIX_CONFIG:-}" nix --extra-experimental-feat
   run nix-darwin/master#darwin-rebuild -- \
   switch --flake "$HOME/.config/nix#$HOSTNAME"
 
-# 3. Install mise-managed tools.
+# 2. Install mise-managed tools.
 if command -v mise >/dev/null 2>&1; then
   mise install
 fi
 
-# 4. Restore npx skills (https://github.com/vercel-labs/skills) from ~/.agents/.skill-lock.json.
+# 3. Restore npx skills (https://github.com/vercel-labs/skills) from ~/.agents/.skill-lock.json.
 if command -v npx >/dev/null 2>&1; then
   npx skills experimental_install
 fi
