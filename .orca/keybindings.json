@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "keybindings": {},
+  "platforms": {
+    "darwin": {
+      "floatingTerminal.toggle": [
+        "Ctrl+Shift+Backquote"
+      ],
+      "tab.nextSameType": [],
+      "tab.previousSameType": [],
+      "tab.nextAllTypes": [
+        "Mod+Shift+BracketRight"
+      ],
+      "tab.previousAllTypes": [
+        "Mod+Shift+BracketLeft"
+      ]
+    },
+    "linux": {},
+    "win32": {}
+  }
+}
