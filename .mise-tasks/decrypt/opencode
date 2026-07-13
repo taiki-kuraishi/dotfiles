@@ -2,7 +2,7 @@
 #MISE description="Decrypt opencode.jsonc"
 
 # Ensure we are using the correct file path
-TARGET_FILE="/Users/kuraishi/.config/opencode/opencode.jsonc"
+TARGET_FILE="$HOME/.config/opencode/opencode.jsonc"
 SOURCE_FILE="${TARGET_FILE}.sops.yaml"
 
 # Check if source file exists
