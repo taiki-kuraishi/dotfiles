@@ -52,7 +52,10 @@
   # PATH（.local/bin は共通。opencode / homebrew は macOS のみ）
   home.sessionPath =
     lib.optionals pkgs.stdenv.isDarwin [ "${config.home.homeDirectory}/.opencode/bin" ]
-    ++ [ "${config.home.homeDirectory}/.local/bin" ]
+    ++ [
+      "${config.home.homeDirectory}/.local/bin"
+      "${config.home.homeDirectory}/.bun/bin"
+    ]
     ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
 
   # プロンプト（starship は yadm 管理の設定が無いので HM に任せてよい）
