@@ -40,11 +40,18 @@
 [ghq]
 	root = ~/Documents/ghq
 [credential "https://github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	# デフォルトは個人アカウント (taiki-kuraishi) 固定。
+	# gh の標準 helper はアクティブアカウントのトークンしか返さないため、
+	# 指定アカウントのトークンを直接取得する。username も明示しないと
+	# git がユーザ名を対話プロンプトで要求してしまう点に注意。
+	# 会社 org (fancomi-interconnect) 配下は includeIf → ~/.gitconfig-work で上書き。
+	username = taiki-kuraishi
+	helper =
+	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user taiki-kuraishi)\"; }; f"
 [credential "https://gist.github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	username = taiki-kuraishi
+	helper =
+	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user taiki-kuraishi)\"; }; f"
 [include]
 	path = ~/.gitconfig.local
 [includeIf "gitdir:~/Documents/ghq/github.com/fancomi-interconnect/"]
