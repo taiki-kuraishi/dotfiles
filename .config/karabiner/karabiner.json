@@ -30,7 +30,7 @@
                             },
                             {
                                 "from": {
-                                    "key_code": "u",
+                                    "key_code": "k",
                                     "modifiers": {
                                         "mandatory": ["left_control"],
                                         "optional": ["any"]
@@ -41,7 +41,7 @@
                             },
                             {
                                 "from": {
-                                    "key_code": "k",
+                                    "key_code": "l",
                                     "modifiers": {
                                         "mandatory": ["left_control"],
                                         "optional": ["any"]
