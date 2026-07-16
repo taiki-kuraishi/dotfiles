@@ -56,3 +56,5 @@
 	path = ~/.gitconfig.local
 [includeIf "gitdir:~/Documents/ghq/github.com/fancomi-interconnect/"]
 	path = /Users/t_kuraishi/.gitconfig-work
+[includeIf "gitdir:~/Documents/ghq/github.com/a8-engineer/"]
+	path = /Users/t_kuraishi/.gitconfig-work
