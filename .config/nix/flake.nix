@@ -7,6 +7,10 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    # hunk（modem-dev/hunk）は nixpkgs 未収録のため upstream flake の default
+    # パッケージを取り込む。nixpkgs は follows で本 flake のものに揃える。
+    hunk.url = "github:modem-dev/hunk";
+    hunk.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -15,10 +19,20 @@
       nix-darwin,
       nixpkgs,
       home-manager,
+      hunk,
     }:
     let
       # ホスト固有の値（ユーザー名・ホスト名）はここだけに集約する。
       # 設定本体（darwin-configuration.nix / home-common.nix）はジェネリックに保つ。
+
+      # nixpkgs 未収録のパッケージを pkgs.<name> として参照できるようにする overlay。
+      # macOS（mkSystem）/ Linux（mkHome）双方に配線し、home-common.nix からは
+      # 由来を意識せず `hunk` として使えるようにする。
+      overlays = [
+        (final: prev: {
+          hunk = hunk.packages.${prev.stdenv.hostPlatform.system}.default;
+        })
+      ];
 
       # macOS: nix-darwin システム + Home Manager 統合
       mkSystem =
@@ -26,6 +40,7 @@
         nix-darwin.lib.darwinSystem {
           specialArgs = { inherit hostName username; };
           modules = [
+            { nixpkgs.overlays = overlays; }
             ./darwin-configuration.nix
             home-manager.darwinModules.home-manager
             {
@@ -49,7 +64,7 @@
         { username, system }:
         home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
-            inherit system;
+            inherit system overlays;
             config.allowUnfree = true;
           };
           extraSpecialArgs = { inherit username; };

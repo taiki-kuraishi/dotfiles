@@ -31,6 +31,8 @@
     tree-sitter
     tmux
     ghq
+    # レビュー向けターミナル diff ビューア（nixpkgs 未収録。flake.nix の overlay 経由）
+    hunk
     # docker CLI クライアント。デーモンは nix/HM では管理せず外部が提供する
     # （macOS: OrbStack / Dory 等、Linux: Pod 側）。
     docker
