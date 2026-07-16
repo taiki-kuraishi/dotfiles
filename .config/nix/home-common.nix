@@ -88,6 +88,28 @@
 
       # OrbStack: command-line tools and integration（macOS のみ）
       source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+
+      # gh を「リポジトリの org」に応じたアカウントで動かす（macOS のみ）。
+      # gh CLI は git の credential 設定（~/.gitconfig の includeIf）を一切見ず、
+      # 単一の「アクティブアカウント」だけを使う。そのため org をまたぐと、
+      # 個人 org（fan-ADN 等）を会社アカウントで解決しようとして 404 になる。
+      # remote origin の org を見てトークンを選べば、ghq のチェックアウトでも
+      # Orca の worktree（ghq ツリー外）でも、場所に依存せず正しく切り替わる。
+      # 判定基準は ~/.gitconfig の includeIf（fancomi-interconnect のみ会社）と一致させる。
+      # org 抽出は sed の非貪欲マッチ（+?）を使わない。macOS の BSD sed は
+      # PCRE 拡張の +? を解釈できず "repetition-operator operand invalid" で
+      # 失敗するため。remote URL の末尾 <org>/<repo> から dirname+basename で
+      # org を取る（https/ssh どちらの形式でも動き、repo 外では "." に落ちる）。
+      gh() {
+        local url org u
+        url=$(command git config --get remote.origin.url 2>/dev/null)
+        org=$(basename "$(dirname "$url")")
+        case "$org" in
+          fancomi-interconnect) u="t-kuraishi_fancs" ;;
+          *)                    u="taiki-kuraishi"   ;;
+        esac
+        GH_TOKEN="$(command gh auth token --user "$u" 2>/dev/null)" command gh "$@"
+      }
     ''
     + lib.optionalString pkgs.stdenv.isLinux ''
 
