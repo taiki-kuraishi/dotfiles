@@ -47,3 +47,5 @@
 	helper = !/opt/homebrew/bin/gh auth git-credential
 [include]
 	path = ~/.gitconfig.local
+[includeIf "gitdir:~/Documents/ghq/github.com/fancomi-interconnect/"]
+	path = /Users/t_kuraishi/.gitconfig-work
