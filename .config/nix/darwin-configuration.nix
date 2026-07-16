@@ -39,6 +39,7 @@
     enable = true;
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
-    casks = [ ];
+    # ghostty は nixpkgs の darwin ビルドが unavailable のため cask で導入する。
+    casks = [ "ghostty" ];
   };
 }
