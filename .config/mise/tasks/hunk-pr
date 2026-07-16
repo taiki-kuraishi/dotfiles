@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Review a GitHub PR diff in hunk"
+#MISE dir="{{cwd}}"
+set -euo pipefail
+gh pr diff "$@" | hunk patch -
