@@ -13,7 +13,8 @@
       ],
       "tab.previousAllTypes": [
         "Mod+Shift+BracketLeft"
-      ]
+      ],
+      "tab.newSimulator": []
     },
     "linux": {},
     "win32": {}
