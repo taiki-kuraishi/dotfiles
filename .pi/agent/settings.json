@@ -1,0 +1,20 @@
+{
+  "lastChangelogVersion": "0.80.10",
+  "theme": "dark",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-8",
+  "defaultThinkingLevel": "medium",
+  "packages": [
+    "npm:@hypabolic/pi-hypa",
+    "npm:pi-web-access",
+    "npm:pi-mcp-adapter",
+    "npm:pi-subagents",
+    "npm:context-mode",
+    "npm:pi-lens",
+    "npm:pi-crew",
+    "npm:pi-simplify",
+    "npm:pi-shazam",
+    "npm:pi-readseek",
+    "npm:@juicesharp/rpiv-todo"
+  ]
+}
