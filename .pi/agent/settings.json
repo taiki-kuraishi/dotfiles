@@ -19,5 +19,6 @@
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
-  "collapseChangelog": true
+  "collapseChangelog": true,
+  "outputPad": 0
 }
