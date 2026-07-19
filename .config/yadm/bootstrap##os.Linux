@@ -30,5 +30,5 @@ if [ ! -x "$HOME/.local/bin/claude" ]; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
 
-# 6. npx skills の復元(node は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
-mise x -- npx skills experimental_install
+# 6. bunx skills の復元(bun は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
+mise x -- bunx skills experimental_install

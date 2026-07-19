@@ -31,7 +31,7 @@ if command -v mise >/dev/null 2>&1; then
   mise install
 fi
 
-# 3. Restore npx skills (https://github.com/vercel-labs/skills) from ~/.agents/.skill-lock.json.
-if command -v npx >/dev/null 2>&1; then
-  npx skills experimental_install
+# 3. Restore bunx skills (https://github.com/vercel-labs/skills) from ~/.agents/.skill-lock.json.
+if command -v bunx >/dev/null 2>&1; then
+  bunx skills experimental_install
 fi
