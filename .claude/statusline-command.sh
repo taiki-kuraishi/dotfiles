@@ -52,6 +52,9 @@ used_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
 ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
 ctx_used_h=$(fmt_tokens "$used_tokens")
 ctx_size_h=$(fmt_tokens "$ctx_size")
+ctx_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+ctx_pct_disp="--"
+[ -n "$ctx_pct" ] && ctx_pct_disp=$(awk -v p="$ctx_pct" 'BEGIN{printf "%.0f", p}')
 
 # ---- rate limits ----
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
@@ -95,8 +98,8 @@ GREEN=$'\033[2;32m'
 model_disp="$model_name"
 [ -n "$effort" ] && model_disp="${model_disp} (${effort})"
 
-printf "%swindow %s/%s%s  %s5h %s %s%%%s%s  %sWk %s %s%%%s%s  %s%s%s\n" \
-  "$CYAN" "$ctx_used_h" "$ctx_size_h" "$RESET" \
+printf "%swindow %s%% %s/%s%s  %s5h %s %s%%%s%s  %sWk %s %s%%%s%s  %s%s%s\n" \
+  "$CYAN" "$ctx_pct_disp" "$ctx_used_h" "$ctx_size_h" "$RESET" \
   "$YELLOW" "$five_bar" "$five_pct_disp" "${five_time:+ $five_time}" "$RESET" \
   "$MAGENTA" "$week_bar" "$week_pct_disp" "${week_time:+ $week_time}" "$RESET" \
   "$GREEN" "$model_disp" "$RESET"
