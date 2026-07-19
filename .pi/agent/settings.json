@@ -16,5 +16,8 @@
     "npm:pi-shazam",
     "npm:pi-readseek",
     "npm:@juicesharp/rpiv-todo"
-  ]
+  ],
+  "hideThinkingBlock": true,
+  "showCacheMissNotices": true,
+  "collapseChangelog": true
 }

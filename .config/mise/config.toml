@@ -6,6 +6,11 @@ uv = "latest"
 go = "latest"
 java = "latest"
 
+# pi-shazam
+"npm:typescript-language-server" = "latest"
+"npm:typescript" = "latest"
+"npm:yaml-language-server" = "latest"
+
 [settings]
 npm.bun = true
 idiomatic_version_file_enable_tools = ["python"]
