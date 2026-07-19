@@ -11,14 +11,12 @@
     "npm:pi-subagents",
     "npm:context-mode",
     "npm:pi-lens",
-    "npm:pi-crew",
     "npm:pi-simplify",
-    "npm:pi-shazam",
-    "npm:pi-readseek",
     "npm:@juicesharp/rpiv-todo"
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "collapseChangelog": true,
-  "outputPad": 0
+  "outputPad": 0,
+  "httpIdleTimeoutMs": 300000
 }
