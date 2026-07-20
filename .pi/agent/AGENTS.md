@@ -17,3 +17,4 @@
   まず context7 (context7-mcp スキル / MCP) を使うこと。
 - web_search はフォールバックとし、context7 で十分な情報が得られない場合や、
   最新ニュース・context7 に無い情報に限って使う。
+- 詳細な使い方: @~/.pi/agent/npm/node_modules/@upstash/context7-pi/skills/context7-docs/SKILL.md

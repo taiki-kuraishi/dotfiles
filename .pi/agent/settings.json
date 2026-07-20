@@ -12,11 +12,13 @@
     "npm:context-mode",
     "npm:pi-lens",
     "npm:pi-simplify",
-    "npm:@juicesharp/rpiv-todo"
+    "npm:@juicesharp/rpiv-todo",
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:@upstash/context7-pi"
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "collapseChangelog": true,
   "outputPad": 0,
-  "httpIdleTimeoutMs": 300000
+  "httpIdleTimeoutMs": 60000
 }
