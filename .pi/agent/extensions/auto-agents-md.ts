@@ -35,7 +35,7 @@ export default function (pi: ExtensionAPI) {
 	const HOME = resolve(homedir());
 	const loaded = new Set<string>(); // 注入済み（重複注入防止）
 	const expanded = new Set<string>(); // import 解析済み（再帰の循環/重複防止）
-	const seeded = false; // セッション履歴から loaded をシード済みか
+	let seeded = false; // セッション履歴から loaded をシード済みか
 
 	/** current が HOME 以下（HOME 自身を含む）か */
 	function withinHome(current: string): boolean {
