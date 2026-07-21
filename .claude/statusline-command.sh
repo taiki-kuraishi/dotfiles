@@ -83,6 +83,13 @@ if [ -n "$week_reset" ]; then
   week_time=$(fmt_duration "$week_remaining")
 fi
 
+# ---- session cost ----
+cost_usd=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
+cost_disp=""
+if [ -n "$cost_usd" ]; then
+  cost_disp=$(awk -v c="$cost_usd" 'BEGIN{ printf "$%.2f", c }')
+fi
+
 # ---- model / effort ----
 model_name=$(echo "$input" | jq -r '.model.display_name // empty')
 effort=$(echo "$input" | jq -r '.effort.level // empty')
@@ -94,12 +101,14 @@ CYAN=$'\033[2;36m'
 YELLOW=$'\033[2;33m'
 MAGENTA=$'\033[2;35m'
 GREEN=$'\033[2;32m'
+BLUE=$'\033[2;34m'
 
 model_disp="$model_name"
 [ -n "$effort" ] && model_disp="${model_disp} (${effort})"
 
-printf "%swindow %s%% %s/%s%s  %s5h %s %s%%%s%s  %sWk %s %s%%%s%s  %s%s%s\n" \
+printf "%swindow %s%% %s/%s%s  %s5h %s %s%%%s%s  %sWk %s %s%%%s%s%s  %s%s%s\n" \
   "$CYAN" "$ctx_pct_disp" "$ctx_used_h" "$ctx_size_h" "$RESET" \
   "$YELLOW" "$five_bar" "$five_pct_disp" "${five_time:+ $five_time}" "$RESET" \
   "$MAGENTA" "$week_bar" "$week_pct_disp" "${week_time:+ $week_time}" "$RESET" \
+  "${cost_disp:+  ${BLUE}${cost_disp}${RESET}}" \
   "$GREEN" "$model_disp" "$RESET"
