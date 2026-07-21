@@ -303,10 +303,6 @@ export default function (pi: ExtensionAPI) {
 		);
 	}
 
-	/** ストリーミング中（tool_call 等）は followUp で注入する */
-	const deliver = (msg: string) =>
-		pi.sendUserMessage(msg, { deliverAs: "followUp" });
-
 	// ---- フック ----------------------------------------------------------------
 
 	// 起動時 context ファイル（cwd の AGENTS.md 等）の @import を展開する。
@@ -365,15 +361,21 @@ export default function (pi: ExtensionAPI) {
 		if (isSkillFile(abs)) return;
 		const dir = startDir(abs);
 
+		const parts: string[] = [];
 		for (const f of collectAgentFiles(dir)) {
 			const m = buildInjection(f, ctx);
-			if (m) deliver(m);
+			if (m) parts.push(m);
 		}
 		for (const f of collectRuleFiles(abs, dir, ctx.cwd)) {
 			const m = buildInjection(f, ctx, { strip: true });
-			if (m) deliver(m);
+			if (m) parts.push(m);
 		}
 		// read した指示ファイルの @import を展開
-		if (isRead && isInstructionFile(abs)) expandImports(abs, ctx, 0, deliver);
+		if (isRead && isInstructionFile(abs))
+			expandImports(abs, ctx, 0, (m) => parts.push(m));
+		// steer: 現ターンの tool 実行完了直後（次の LLM 呼び出し前）に届く。
+		// steeringMode "one-at-a-time" でも 1 通で全ヒットが届くようイベント単位で束ねる。
+		if (parts.length > 0)
+			pi.sendUserMessage(parts.join("\n\n"), { deliverAs: "steer" });
 	});
 }
