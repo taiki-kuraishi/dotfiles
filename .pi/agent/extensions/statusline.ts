@@ -186,6 +186,30 @@ async function fetchUsage(): Promise<boolean> {
 	}
 }
 
+/** Greedily pack segments into lines (CSS flex-wrap style). gap = 2 spaces. */
+function flexWrap(segments: string[], width: number, gap = 2): string[] {
+	const lines: string[] = [];
+	let cur = "";
+	let curW = 0;
+	for (const seg of segments) {
+		if (!seg) continue;
+		const w = visibleWidth(seg);
+		if (cur === "") {
+			cur = seg;
+			curW = w;
+		} else if (curW + gap + w <= width) {
+			cur += " ".repeat(gap) + seg;
+			curW += gap + w;
+		} else {
+			lines.push(cur);
+			cur = seg;
+			curW = w;
+		}
+	}
+	if (cur !== "") lines.push(cur);
+	return lines.map((l) => truncateToWidth(l, width));
+}
+
 export default function (pi: ExtensionAPI) {
 	let enabled = true;
 	// Live TUI handle so async usage updates can trigger a footer re-render.
@@ -249,13 +273,9 @@ export default function (pi: ExtensionAPI) {
 					const branchStr = branch ? `${DIM} \u2387 ${branch}${RESET}` : "";
 					const modelStr = `${GREEN}${modelId}${thinking}${RESET}`;
 
-					const left = `${ctxStr}  ${limitStr}`;
-					const right = modelStr + branchStr;
-					const gap = Math.max(
-						1,
-						width - visibleWidth(left) - visibleWidth(right),
-					);
-					return [truncateToWidth(left + " ".repeat(gap) + right, width)];
+					// flex-wrap: pack segments into lines, wrap when width exceeded.
+					const segments = [ctxStr, limitStr, modelStr + branchStr];
+					return flexWrap(segments, width);
 				},
 			};
 		});
