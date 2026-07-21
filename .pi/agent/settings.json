@@ -2,8 +2,8 @@
   "lastChangelogVersion": "0.80.10",
   "theme": "dark",
   "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-8",
-  "defaultThinkingLevel": "medium",
+  "defaultModel": "claude-fable-5",
+  "defaultThinkingLevel": "max",
   "packages": [
     "npm:@hypabolic/pi-hypa",
     "npm:pi-web-access",
@@ -20,5 +20,8 @@
   "showCacheMissNotices": true,
   "collapseChangelog": true,
   "outputPad": 0,
-  "httpIdleTimeoutMs": 60000
+  "httpIdleTimeoutMs": 60000,
+  "warnings": {
+    "anthropicExtraUsage": false
+  }
 }
