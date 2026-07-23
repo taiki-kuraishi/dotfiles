@@ -71,6 +71,10 @@
       do = "docker";
       doc = "docker compose";
       mtr = "mise tasks run";
+    }
+    // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # Tailscale.app 同梱の CLI（Homebrew 版と違い GUI 連携込みで動く）を使う
+      tailscale = "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
     };
 
     # 既定順（order 1000 = compinit 後。旧 initExtra 相当）
@@ -88,6 +92,10 @@
 
       # OrbStack: command-line tools and integration（macOS のみ）
       source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+
+      # Tailscale.app 同梱 CLI の zsh 補完（alias 経由で PATH 上に無いため実体パスで判定）
+      [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ] \
+        && source <("/Applications/Tailscale.app/Contents/MacOS/Tailscale" completion zsh)
 
       # gh を「リポジトリの org」に応じたアカウントで動かす（macOS のみ）。
       # gh CLI は git の credential 設定（~/.gitconfig の includeIf）を一切見ず、
