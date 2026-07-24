@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   macos:
-    runs-on: macos-15 # arm64 = aarch64-darwin（flake の hostPlatform に一致）
+    runs-on: macos-26 # arm64 = aarch64-darwin（flake の hostPlatform に一致）
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
