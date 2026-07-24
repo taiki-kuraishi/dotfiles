@@ -76,6 +76,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # 前提 nix（公式/upstream 版）を導入。bootstrap##os.Linux が `nix run` を呼ぶため必須。
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: false
+          extra-conf: |
+            experimental-features = nix-command flakes
+
       - name: Install yadm
         run: sudo apt-get update && sudo apt-get install -y yadm
 
