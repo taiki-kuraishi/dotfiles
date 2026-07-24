@@ -39,6 +39,19 @@ jobs:
             --config .config/dprint/dprint.json \
             $(git ls-files '*.json' '*.yml' '*.yaml')
 
+  statusline-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      # gh / stty はテスト内でモック済みなので、追加のセットアップや認証は不要
+      - name: Run statusline display tests
+        run: bats .claude/statusline-command.bats
+
   flake-check:
     runs-on: ubuntu-latest
     timeout-minutes: 10

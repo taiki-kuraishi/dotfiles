@@ -6,6 +6,7 @@ uv = "latest"
 go = "latest"
 java = "latest"
 deno = "latest"
+bats = "latest"
 
 # pi-shazam
 "npm:typescript-language-server" = "latest"
