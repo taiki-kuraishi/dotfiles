@@ -1,0 +1,45 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+  ],
+  // Dependency Dashboard は config:recommended で既定 ON。実際に issue/PR を出すには
+  // Mend ポータルでこのリポジトリの mode を Silent から On に切り替える必要がある。
+  timezone: "Asia/Tokyo",
+
+  // mise.lock / flake.lock を週次(既定: 月曜 04:00 前)で再生成し、
+  // mise の latest 追従と nix flake input の更新をまとめて回す。
+  // mise の lock 更新は unsafe execution 扱いだが Mend hosted は allowedUnsafeExecutions に mise を含む。
+  lockFileMaintenance: {
+    enabled: true,
+  },
+
+  // nix マネージャを明示有効化（flake.nix の input と flake.lock を更新対象にする）。
+  nix: {
+    enabled: true,
+  },
+
+  // dprint には専用マネージャが無いので、wasm プラグイン URL のバージョンを regex で更新する。
+  // ponytail: 対象は .config/dprint/dprint.json の2プラグインのみ。誤爆したら customManagers ごと消してよい。
+  customManagers: [
+    {
+      // 公式プラグイン: https://plugins.dprint.dev/<name>-<ver>.wasm → dprint/dprint-plugin-<name>
+      customType: "regex",
+      managerFilePatterns: ["/^\\.config/dprint/dprint\\.json$/"],
+      matchStrings: [
+        "https://plugins\\.dprint\\.dev/(?<depName>[a-z0-9_-]+)-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.wasm",
+      ],
+      datasourceTemplate: "github-releases",
+      packageNameTemplate: "dprint/dprint-plugin-{{{depName}}}",
+    },
+    {
+      // サードパーティ: https://plugins.dprint.dev/<org>/<repo>-v<ver>.wasm → <org>/<repo>
+      customType: "regex",
+      managerFilePatterns: ["/^\\.config/dprint/dprint\\.json$/"],
+      matchStrings: [
+        "https://plugins\\.dprint\\.dev/(?<depName>[a-z0-9_-]+/[a-z0-9_-]+)-v(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.wasm",
+      ],
+      datasourceTemplate: "github-releases",
+    },
+  ],
+}
