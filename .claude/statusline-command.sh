@@ -1,6 +1,6 @@
 #!/bin/bash
 # Claude Code statusline: context window usage + 5h/weekly rate-limit bars
-#   + PR number (OSC 8 clickable) + CI status.
+#   + PR number (OSC 8 clickable) + per-state CI counts for the current branch.
 # PR/CI are derived from `gh` (NOT the stdin .pr field, which is absent in
 # fork-based repos), fetched in the background and cached so we never block.
 input=$(cat)
@@ -164,28 +164,44 @@ if [ -n "$cwd" ] && command -v gh >/dev/null 2>&1 \
     num=$(strip_ansi < "$raw" | jq -r '.number // empty' 2>/dev/null)
     url=$(strip_ansi < "$raw" | jq -r '.url // empty'    2>/dev/null)
 
-    if [ -z "$num" ]; then
-      : > "$tmp"                       # no open PR -> empty segment
-    else
+    pr_part=""
+    if [ -n "$num" ]; then
       # clickable "#NNN" via OSC 8, dim blue
       pr_part=$(printf '\033[2;34m%s]8;;%s%s#%s%s]8;;%s\033[0m' \
                 "$ESC" "$url" "$BEL" "$num" "$ESC" "$BEL")
-
-      # 2) CI status for that PR
-      gh_bounded 12 "$raw" pr checks "$num" --json bucket -q '.[].bucket'
-      buckets=$(strip_ansi < "$raw" 2>/dev/null)
-      ci_part=""
-      if [ -n "$buckets" ]; then
-        fail=$(printf '%s\n' "$buckets" | grep -c '^fail$')
-        pend=$(printf '%s\n' "$buckets" | grep -c '^pending$')
-        pass=$(printf '%s\n' "$buckets" | grep -c '^pass$')
-        if   [ "$fail" -gt 0 ]; then ci_part=$(printf '  \033[2;31m✗CI %d\033[0m' "$fail")
-        elif [ "$pend" -gt 0 ]; then ci_part=$(printf '  \033[2;33m●CI %d\033[0m' "$pend")
-        elif [ "$pass" -gt 0 ]; then ci_part=$(printf '  \033[2;32m✓CI\033[0m')
-        fi
-      fi
-      printf '%s%s' "$pr_part" "$ci_part" > "$tmp"
     fi
+
+    # 2) CI: per-state counts of the newest commit's runs on this branch,
+    #    via the Actions runs API -> works with or without a PR.
+    #    ponytail: GitHub Actions only; non-Actions CI (Checks API) won't show.
+    branch=$(git branch --show-current 2>/dev/null)
+    ci_part=""
+    if [ -n "$branch" ]; then
+      gh_bounded 12 "$raw" run list --branch "$branch" --limit 20 \
+        --json status,conclusion,headSha
+      # keep only the newest commit's runs, map each to one state
+      states=$(strip_ansi < "$raw" | jq -r '
+        (.[0].headSha // "") as $sha | .[] | select(.headSha == $sha)
+        | if .status != "completed" then
+            (if .status == "in_progress" then "running" else "queued" end)
+          elif .conclusion == "success" then "pass"
+          elif .conclusion == "skipped" or .conclusion == "neutral" then "skipped"
+          else "fail" end' 2>/dev/null)
+      if [ -n "$states" ]; then
+        cnt() { printf '%s\n' "$states" | grep -c "^$1$"; }
+        np=$(cnt pass); nf=$(cnt fail); nq=$(cnt queued); nr=$(cnt running); ns=$(cnt skipped)
+        ci_part=$'\033[2mCI\033[0m'
+        [ "$np" -gt 0 ] && ci_part+=$(printf ' \033[2;32m✓%d\033[0m' "$np")
+        [ "$nf" -gt 0 ] && ci_part+=$(printf ' \033[2;31m✗%d\033[0m' "$nf")
+        [ "$nq" -gt 0 ] && ci_part+=$(printf ' \033[2;37m○%d\033[0m' "$nq")
+        [ "$nr" -gt 0 ] && ci_part+=$(printf ' \033[2;33m●%d\033[0m' "$nr")
+        [ "$ns" -gt 0 ] && ci_part+=$(printf ' \033[2;90m⊘%d\033[0m' "$ns")
+      fi
+    fi
+
+    sep=""
+    [ -n "$pr_part" ] && [ -n "$ci_part" ] && sep="  "
+    printf '%s%s%s' "$pr_part" "$sep" "$ci_part" > "$tmp"
 
     rm -f "$raw"
     mv "$tmp" "$prci_cache" 2>/dev/null
@@ -197,13 +213,37 @@ fi
 prci_disp=""
 [ -s "$prci_cache" ] && prci_disp=$(cat "$prci_cache")
 
-# ---- render (single line) ----
-printf "%swindow %s%% %s/%s%s  %s5h %s %s%%%s%s  %sWk %s %s%%%s%s%s  %s%s%s" \
-  "$CYAN" "$ctx_pct_disp" "$ctx_used_h" "$ctx_size_h" "$RESET" \
-  "$YELLOW" "$five_bar" "$five_pct_disp" "${five_time:+ $five_time}" "$RESET" \
-  "$MAGENTA" "$week_bar" "$week_pct_disp" "${week_time:+ $week_time}" "$RESET" \
-  "${cost_disp:+  ${BLUE}${cost_disp}${RESET}}" \
-  "$GREEN" "$model_disp" "$RESET"
+# ---- render: flex-like wrap (pack segments left to right, wrap at term width) ----
+segs=()
+segs+=("$(printf '%swindow %s%% %s/%s%s' "$CYAN" "$ctx_pct_disp" "$ctx_used_h" "$ctx_size_h" "$RESET")")
+segs+=("$(printf '%s5h %s %s%%%s%s' "$YELLOW" "$five_bar" "$five_pct_disp" "${five_time:+ $five_time}" "$RESET")")
+segs+=("$(printf '%sWk %s %s%%%s%s' "$MAGENTA" "$week_bar" "$week_pct_disp" "${week_time:+ $week_time}" "$RESET")")
+[ -n "$cost_disp" ] && segs+=("${BLUE}${cost_disp}${RESET}")
+segs+=("${GREEN}${model_disp}${RESET}")
+[ -n "$prci_disp" ] && segs+=("$prci_disp")
 
-# PR + CI (already fully colored in cache); add a leading separator if present
-printf "%s\n" "${prci_disp:+  ${prci_disp}}"
+# terminal width: live from the controlling tty, else COLUMNS, else no wrap
+term_cols=$(stty size 2>/dev/null </dev/tty | awk '{print $2}')
+[ -n "$term_cols" ] || term_cols=${COLUMNS:-9999}
+
+vlen() {
+  # visible width of $1: drop OSC 8 links + SGR colors, count chars (not bytes)
+  # ponytail: chars==columns; ambiguous-width glyphs (━ ● etc.) assumed 1 col
+  printf '%s' "$1" \
+    | sed $'s/\x1b]8;;[^\x07]*\x07//g; s/\x1b\\[[0-9;]*m//g' \
+    | LC_ALL=en_US.UTF-8 wc -m | tr -d ' '
+}
+
+line=""; llen=0
+for seg in "${segs[@]}"; do
+  slen=$(vlen "$seg")
+  if [ -z "$line" ]; then
+    line="$seg"; llen=$slen
+  elif [ $((llen + 2 + slen)) -le "$term_cols" ]; then
+    line="${line}  ${seg}"; llen=$((llen + 2 + slen))
+  else
+    printf '%s\n' "$line"
+    line="$seg"; llen=$slen
+  fi
+done
+printf '%s\n' "$line"
