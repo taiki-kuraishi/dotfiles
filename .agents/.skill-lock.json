@@ -6,10 +6,9 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/mattpocock/skills.git",
       "skillPath": "skills/productivity/grill-me/SKILL.md",
-      "skillFolderHash": "8320e7b87f7b208f50ce165b1dd43d1e93c8e801",
-      "pluginName": "mattpocock-skills",
+      "skillFolderHash": "c817f6f36acd483294144694a935a76d3e3eb101",
       "installedAt": "2026-06-16T07:02:12.801Z",
-      "updatedAt": "2026-07-10T16:25:27.604Z"
+      "updatedAt": "2026-07-26T04:51:04.534Z"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
