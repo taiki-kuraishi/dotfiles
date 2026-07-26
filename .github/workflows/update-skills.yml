@@ -9,8 +9,6 @@ concurrency:
   group: update-skills
   cancel-in-progress: false
 
-# PR の作成/更新は GitHub App のトークンで行うので、GITHUB_TOKEN は
-# nix の api.github.com レート制限回避（read）にしか使わない。
 permissions:
   contents: read
 
@@ -20,45 +18,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-
       - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-
-      # `npx skills update -g` は $HOME/.agents/.skill-lock.json を読み書きする。
-      # このリポジトリの worktree は $HOME そのものなので、HOME を workspace に向けて
-      # チェックアウト済みの lockfile を直接更新させる。
-      # skill 本体（.agents/skills/）は untracked でランナー上に存在しないが、update は
-      # lockfile のエントリだけを見て上流を確認するため、無くても正しく動く。
-      # npm のキャッシュが workspace を汚さないよう cache も runner.temp へ逃がす。
       - name: Update global agent skills
         env:
           HOME: ${{ github.workspace }}
           npm_config_cache: ${{ runner.temp }}/npm-cache
         run: npx --yes skills@latest update -g -y
-
-      - uses: DeterminateSystems/nix-installer-action@main
-        with:
-          determinate: false
-          extra-conf: |
-            experimental-features = nix-command flakes
-
-      # skills CLI は末尾改行なしで lockfile を書き出すため、そのままだと ci.yml の
-      # `dprint check` に落ちる。commit 前に ci.yml と同じ dprint で整形しておく。
-      - name: dprint fmt
-        env:
-          NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
-        run: nix run nixpkgs#dprint -- fmt --config .config/dprint/dprint.json .agents/.skill-lock.json
-
       - uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ vars.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
-
-      # HOME 差し替えでランナー上に復元された .agents/skills/ を巻き込まないよう、
-      # add-paths で lockfile だけに絞る。
-      # GITHUB_TOKEN ではなく App トークンで push するため、この PR でも ci.yml が走る。
       - uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.app-token.outputs.token }}
