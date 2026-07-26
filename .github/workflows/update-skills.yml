@@ -27,7 +27,7 @@ jobs:
       - uses: actions/create-github-app-token@v3
         id: app-token
         with:
-          app-id: ${{ vars.BOT_APP_ID }}
+          client-id: ${{ vars.BOT_CLIENT_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
       - uses: peter-evans/create-pull-request@v8
         with:
@@ -37,8 +37,10 @@ jobs:
           delete-branch: true
           commit-message: "⬆️ skills: update global agent skills"
           title: "⬆️ skills: update global agent skills"
+          reviewers: taiki-kuraishi
           body: |
-            `npx skills update -g` による自動更新です。
+            Automated update by `npx skills update -g`.
 
-            更新対象は `.agents/.skill-lock.json` のみです。skill 本体（`.agents/skills/`）は
-            untracked なので、マージ後に手元で `npx skills update -g` を実行して同期してください。
+            Only `.agents/.skill-lock.json` is updated here. The skill contents
+            (`.agents/skills/`) are untracked, so run `npx skills update -g` locally
+            after merging to sync them.
