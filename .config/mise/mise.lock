@@ -13,13 +13,23 @@ url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 [tools.bats."platforms.linux-x64"]
 url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 
+[tools.bats."platforms.linux-x64-baseline"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
+
 [tools.bats."platforms.linux-x64-musl"]
 url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 
+[tools.bats."platforms.linux-x64-musl-baseline"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
+
 [tools.bats."platforms.macos-arm64"]
+checksum = "blake3:9b3dc5d296f3da85ce1062c7f9648c979cf2b982f0151f785eaa84d448dec779"
 url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 
 [tools.bats."platforms.macos-x64"]
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
+
+[tools.bats."platforms.macos-x64-baseline"]
 url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 
 [[tools.bun]]
@@ -177,7 +187,15 @@ url = "https://unofficial-builds.nodejs.org/download/release/v26.0.0/node-v26.0.
 checksum = "sha256:42cee4d7ec80b7f7c89281cf00726b14840ac674462404dd4fd36f03964dc0af"
 url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-linux-x64.tar.gz"
 
+[tools.node."platforms.linux-x64-baseline"]
+checksum = "sha256:42cee4d7ec80b7f7c89281cf00726b14840ac674462404dd4fd36f03964dc0af"
+url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-linux-x64.tar.gz"
+
 [tools.node."platforms.linux-x64-musl"]
+checksum = "sha256:333c376e342e5e5c0505f19eaab4990cc03f47a15dd5628c30fe64c39048b995"
+url = "https://unofficial-builds.nodejs.org/download/release/v26.0.0/node-v26.0.0-linux-x64-musl.tar.gz"
+
+[tools.node."platforms.linux-x64-musl-baseline"]
 checksum = "sha256:333c376e342e5e5c0505f19eaab4990cc03f47a15dd5628c30fe64c39048b995"
 url = "https://unofficial-builds.nodejs.org/download/release/v26.0.0/node-v26.0.0-linux-x64-musl.tar.gz"
 
@@ -189,7 +207,15 @@ url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-darwin-arm64.tar.gz"
 checksum = "sha256:f488ab543fe202d8a2d56e661682117d3c56903a2bf64f2ec1ff7bd421cfd875"
 url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-darwin-x64.tar.gz"
 
+[tools.node."platforms.macos-x64-baseline"]
+checksum = "sha256:f488ab543fe202d8a2d56e661682117d3c56903a2bf64f2ec1ff7bd421cfd875"
+url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-darwin-x64.tar.gz"
+
 [tools.node."platforms.windows-x64"]
+checksum = "sha256:d0418640a36096e00bddb57761aa0b1b98f91904ec4ed2b9dd75cbad723becd7"
+url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-win-x64.zip"
+
+[tools.node."platforms.windows-x64-baseline"]
 checksum = "sha256:d0418640a36096e00bddb57761aa0b1b98f91904ec4ed2b9dd75cbad723becd7"
 url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-win-x64.zip"
 
@@ -228,9 +254,21 @@ checksum = "sha256:4b7dbc672dc28a3c15d28fbe85fef3303caae82ee83017684c25532624195
 url = "https://github.com/pnpm/pnpm/releases/download/v11.0.7/pnpm-linux-x64.tar.gz"
 provenance = "github-attestations"
 
+[tools.pnpm."platforms.linux-x64-baseline"]
+checksum = "sha256:4b7dbc672dc28a3c15d28fbe85fef3303caae82ee83017684c255326241951c9"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.7/pnpm-linux-x64.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/413883946"
+provenance = "github-attestations"
+
 [tools.pnpm."platforms.linux-x64-musl"]
 checksum = "sha256:af17d8f61e6e716ccffb300b576518ed79dd906717e547eff2337d653274b273"
 url = "https://github.com/pnpm/pnpm/releases/download/v11.0.7/pnpm-linux-x64-musl.tar.gz"
+provenance = "github-attestations"
+
+[tools.pnpm."platforms.linux-x64-musl-baseline"]
+checksum = "sha256:af17d8f61e6e716ccffb300b576518ed79dd906717e547eff2337d653274b273"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.7/pnpm-linux-x64-musl.tar.gz"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/413883945"
 provenance = "github-attestations"
 
 [tools.pnpm."platforms.macos-arm64"]
@@ -241,6 +279,12 @@ provenance = "github-attestations"
 [tools.pnpm."platforms.windows-x64"]
 checksum = "sha256:a8966a3b2363e014107bac4e28a79c38d48146ec3a0b7772d749e8a5890440b2"
 url = "https://github.com/pnpm/pnpm/releases/download/v11.0.7/pnpm-win32-x64.zip"
+provenance = "github-attestations"
+
+[tools.pnpm."platforms.windows-x64-baseline"]
+checksum = "sha256:a8966a3b2363e014107bac4e28a79c38d48146ec3a0b7772d749e8a5890440b2"
+url = "https://github.com/pnpm/pnpm/releases/download/v11.0.7/pnpm-win32-x64.zip"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/413883947"
 provenance = "github-attestations"
 
 [[tools.uv]]
