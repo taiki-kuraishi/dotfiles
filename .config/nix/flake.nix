@@ -11,6 +11,15 @@
     # パッケージを取り込む。nixpkgs は follows で本 flake のものに揃える。
     hunk.url = "github:modem-dev/hunk";
     hunk.inputs.nixpkgs.follows = "nixpkgs";
+    # hunk が lock する bun2nix は古く、systems に nix-systems/default
+    # （x86_64-darwin を含む）を使う。nixpkgs 26.11 は x86_64-darwin を
+    # throw するため hunk の評価ごと落ちる。root の input として宣言して
+    # follows で上書きし、常に最新（nix-systems/triplet）を掴ませる。
+    # hunk 側の lock は hunk 更新のたびに古い pin へ巻き戻るので、
+    # flake.lock だけを直す方法では持続しない。
+    bun2nix.url = "github:nix-community/bun2nix";
+    bun2nix.inputs.nixpkgs.follows = "nixpkgs";
+    hunk.inputs.bun2nix.follows = "bun2nix";
   };
 
   outputs =
@@ -20,6 +29,7 @@
       nixpkgs,
       home-manager,
       hunk,
+      ...
     }:
     let
       # ホスト固有の値（ユーザー名・ホスト名）はここだけに集約する。

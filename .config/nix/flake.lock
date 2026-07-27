@@ -4,7 +4,6 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "nixpkgs": [
-          "hunk",
           "nixpkgs"
         ],
         "systems": "systems",
@@ -27,7 +26,6 @@
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
-          "hunk",
           "bun2nix",
           "nixpkgs"
         ]
@@ -68,7 +66,9 @@
     },
     "hunk": {
       "inputs": {
-        "bun2nix": "bun2nix",
+        "bun2nix": [
+          "bun2nix"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -125,6 +125,7 @@
     },
     "root": {
       "inputs": {
+        "bun2nix": "bun2nix",
         "home-manager": "home-manager",
         "hunk": "hunk",
         "nix-darwin": "nix-darwin",
@@ -149,7 +150,6 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
-          "hunk",
           "bun2nix",
           "nixpkgs"
         ]
