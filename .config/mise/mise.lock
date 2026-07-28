@@ -276,6 +276,10 @@ url = "https://nodejs.org/dist/v26.0.0/node-v26.0.0-win-x64.zip"
 version = "0.80.10"
 backend = "npm:@earendil-works/pi-coding-agent"
 
+[[tools."npm:ntn"]]
+version = "0.21.2"
+backend = "npm:ntn"
+
 [[tools."npm:typescript"]]
 version = "7.0.2"
 backend = "npm:typescript"

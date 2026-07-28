@@ -16,6 +16,8 @@ bats = "latest"
 # pi coding agent
 "npm:@earendil-works/pi-coding-agent" = "latest"
 
+"npm:ntn" = "latest"
+
 [settings]
 npm.bun = true
 idiomatic_version_file_enable_tools = ["python"]
