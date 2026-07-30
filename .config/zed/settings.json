@@ -59,6 +59,10 @@
   "agent": {
     "terminal_init_command": "",
     "dock": "right",
+    // Terminal Thread の CLI (Claude Code 等) がベルを鳴らしたら OS 通知 + 音
+    // FYI: https://zed.dev/docs/ai/terminal-threads
+    "notify_when_agent_waiting": "primary_screen",
+    "play_sound_when_agent_done": "always",
     "favorite_models": [],
     "model_parameters": []
   },
