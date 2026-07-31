@@ -58,3 +58,8 @@
 	path = ~/.gitconfig-work
 [includeIf "gitdir:~/Documents/ghq/github.com/a8-engineer/"]
 	path = ~/.gitconfig-work
+# EMU (Enterprise Managed User) 自身の namespace。個人 repo でも enterprise 側の
+# アカウントでないと 404 "Repository not found" になる（EMU の private repo は
+# enterprise 外から不可視で、GitHub は 403 ではなく 404 を返す）。
+[includeIf "gitdir:~/Documents/ghq/github.com/t-kuraishi_fancs/"]
+	path = ~/.gitconfig-work
