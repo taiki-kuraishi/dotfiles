@@ -15,34 +15,42 @@
   home.stateVersion = "25.05";
 
   # ユーザーパッケージ（両 OS 共通）
-  home.packages = with pkgs; [
-    neovim
-    git
-    nixfmt
-    dprint
-    nixd
-    cloudflared
-    mise
-    gh
-    ripgrep
-    fd
-    fzf
-    lazygit
-    tree-sitter
-    tmux
-    ghq
-    # レビュー向けターミナル diff ビューア（nixpkgs 未収録。flake.nix の overlay 経由）
-    hunk
-    # docker CLI クライアント。デーモンは nix/HM では管理せず外部が提供する
-    # （macOS: OrbStack / Dory 等、Linux: Pod 側）。
-    docker
-    kubectl
-    # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
-    # （例: better-sqlite3 の node-gyp フォールバック）用の最低限のツールチェイン。
-    gcc
-    gnumake
-    python3
-  ];
+  home.packages =
+    with pkgs;
+    [
+      neovim
+      git
+      nixfmt
+      dprint
+      nixd
+      cloudflared
+      mise
+      gh
+      ripgrep
+      fd
+      fzf
+      lazygit
+      tree-sitter
+      tmux
+      ghq
+      # レビュー向けターミナル diff ビューア（nixpkgs 未収録。flake.nix の overlay 経由）
+      hunk
+      # docker CLI クライアント。デーモンは nix/HM では管理せず外部が提供する
+      # （macOS: OrbStack / Dory 等、Linux: Pod 側）。
+      docker
+      kubectl
+      # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
+      # （例: better-sqlite3 の node-gyp フォールバック）用の最低限のツールチェイン。
+      gnumake
+      python3
+    ]
+    ++ lib.optionals stdenv.isLinux [
+      # C コンパイラは Linux のみ nix から入れる。macOS は Xcode CLT が
+      # /usr/bin/{cc,gcc,clang}（Apple clang）を提供済みで、nix の gcc を入れると
+      # PATH 上で cc を覆い、macOS SDK の libiconv 等を解決できずリンクが壊れる
+      # （例: cargo build が `ld: library not found for -liconv` で落ちる）。
+      gcc
+    ];
 
   # 環境変数
   home.sessionVariables = {
@@ -98,18 +106,6 @@
         && source <("/Applications/Tailscale.app/Contents/MacOS/Tailscale" completion zsh)
 
       # gh を「リポジトリの org」に応じたアカウントで動かす（macOS のみ）。
-      # gh CLI は git の credential 設定（~/.gitconfig の includeIf）を一切見ず、
-      # 単一の「アクティブアカウント」だけを使う。そのため org をまたぐと、
-      # 個人 org（fan-ADN 等）を会社アカウントで解決しようとして 404 になる。
-      # remote origin の org を見てトークンを選べば、ghq のチェックアウトでも
-      # Orca の worktree（ghq ツリー外）でも、場所に依存せず正しく切り替わる。
-      # 判定基準は ~/.gitconfig の includeIf と一致させる（会社側は fancomi-interconnect /
-      # a8-engineer / t-kuraishi_fancs の3つ。最後は EMU 自身の namespace で、
-      # 個人 repo も enterprise 側アカウントでないと 404 になる）。
-      # org 抽出は sed の非貪欲マッチ（+?）を使わない。macOS の BSD sed は
-      # PCRE 拡張の +? を解釈できず "repetition-operator operand invalid" で
-      # 失敗するため。remote URL の末尾 <org>/<repo> から dirname+basename で
-      # org を取る（https/ssh どちらの形式でも動き、repo 外では "." に落ちる）。
       gh() {
         local url org u
         url=$(command git config --get remote.origin.url 2>/dev/null)
