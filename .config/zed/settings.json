@@ -41,6 +41,18 @@
       "host": "n100.tsar-bmb.org",
       "args": [],
       "projects": []
+    },
+    {
+      "host": "admin-gateway.tailc08b7f.ts.net",
+      "username": "user",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/user"
+          ]
+        }
+      ]
     }
   ],
   "session": {
