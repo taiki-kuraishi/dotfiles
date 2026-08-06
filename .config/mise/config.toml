@@ -15,6 +15,7 @@ bats = "latest"
 
 # pi coding agent
 "npm:@earendil-works/pi-coding-agent" = "latest"
+"cargo:shpool" = "latest"
 
 [settings]
 npm.bun = true
