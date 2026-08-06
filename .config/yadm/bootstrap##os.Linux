@@ -30,5 +30,6 @@ if [ ! -x "$HOME/.local/bin/claude" ]; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
 
-# 6. bunx skills の復元(bun は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
-mise x -- bunx skills experimental_install
+# 6. bunx skills をグローバルインストール(bun は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
+#    欲しい skill はここに明示的に追加する(lockfile からの復元ではなく宣言的に管理)。
+mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code

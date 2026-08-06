@@ -31,7 +31,8 @@ if command -v mise >/dev/null 2>&1; then
   mise install
 fi
 
-# 3. Restore bunx skills (https://github.com/vercel-labs/skills) from ~/.agents/.skill-lock.json.
+# 3. Install bunx skills (https://github.com/vercel-labs/skills), declared explicitly here
+#    (not restored from a lockfile — same list as the Linux bootstrap step 6).
 if command -v bunx >/dev/null 2>&1; then
-  bunx skills experimental_install
+  bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
 fi
