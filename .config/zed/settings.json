@@ -51,6 +51,11 @@
           "paths": [
             "/home/user"
           ]
+        },
+        {
+          "paths": [
+            "/home/user/Documents/ghq/github.com/taiki-kuraishi/roppoh"
+          ]
         }
       ]
     }
