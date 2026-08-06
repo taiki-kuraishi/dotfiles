@@ -26,6 +26,7 @@
       cloudflared
       mise
       gh
+      jq
       ripgrep
       fd
       fzf
