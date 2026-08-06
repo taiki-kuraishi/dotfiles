@@ -9,51 +9,6 @@
       "skillFolderHash": "c817f6f36acd483294144694a935a76d3e3eb101",
       "installedAt": "2026-06-16T07:02:12.801Z",
       "updatedAt": "2026-07-26T04:56:37.193Z"
-    },
-    "find-skills": {
-      "source": "vercel-labs/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/vercel-labs/skills.git",
-      "skillPath": "skills/find-skills/SKILL.md",
-      "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
-      "installedAt": "2026-06-16T07:02:20.722Z",
-      "updatedAt": "2026-07-12T01:48:55.059Z"
-    },
-    "orca-cli": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/stablyai/orca.git",
-      "skillPath": "skills/orca-cli/SKILL.md",
-      "skillFolderHash": "97f6596bb43a56c6e81246f077c35144c9025343",
-      "installedAt": "2026-07-09T03:04:35.106Z",
-      "updatedAt": "2026-07-26T04:05:38.677Z"
-    },
-    "computer-use": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/stablyai/orca.git",
-      "skillPath": "skills/computer-use/SKILL.md",
-      "skillFolderHash": "2072384f53670cb61d93f4f6264ad2d8f6b5239c",
-      "installedAt": "2026-07-09T07:03:29.644Z",
-      "updatedAt": "2026-07-25T01:28:24.527Z"
-    },
-    "orchestration": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/stablyai/orca.git",
-      "skillPath": "skills/orchestration/SKILL.md",
-      "skillFolderHash": "9aa26fde93c0592e5983cdca1ccd33b402802255",
-      "installedAt": "2026-07-09T07:03:29.649Z",
-      "updatedAt": "2026-07-25T01:27:46.081Z"
-    },
-    "orca-per-workspace-env": {
-      "source": "stablyai/orca",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/stablyai/orca.git",
-      "skillPath": "skills/orca-per-workspace-env/SKILL.md",
-      "skillFolderHash": "942b9397139f9d5b6cd4164339c965c35494985d",
-      "installedAt": "2026-07-25T01:22:15.341Z",
-      "updatedAt": "2026-07-25T01:22:15.341Z"
     }
   },
   "dismissed": {
