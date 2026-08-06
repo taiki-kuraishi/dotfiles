@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "deny": [],
+    "defaultMode": "auto"
+  },
+  "model": "sonnet",
+  "hooks": {},
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline-command.sh\""
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "ponytail@ponytail": true,
+    "slack@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "notion@claude-plugins-official": true,
+    "cloudflare@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  },
+  "language": "日本語",
+  "effortLevel": "xhigh",
+  "tui": "fullscreen",
+  "autoMemoryEnabled": false,
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "preferredNotifChannel": "terminal_bell",
+  "remoteControlAtStartup": false,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true
+}
