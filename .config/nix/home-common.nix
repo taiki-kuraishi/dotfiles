@@ -27,6 +27,7 @@
       mise
       gh
       jq
+      less
       ripgrep
       fd
       fzf
