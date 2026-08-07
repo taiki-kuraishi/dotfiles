@@ -18,6 +18,9 @@ bats = "latest"
 "cargo:shpool" = "latest"
 rust = "latest"
 
+# git worktree manager
+"cargo:worktrunk" = "latest"
+
 [settings]
 npm.bun = true
 idiomatic_version_file_enable_tools = ["python"]

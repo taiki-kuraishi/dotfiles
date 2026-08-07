@@ -93,6 +93,10 @@ url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-
 version = "0.11.0"
 backend = "cargo:shpool"
 
+[[tools."cargo:worktrunk"]]
+version = "0.71.0"
+backend = "cargo:worktrunk"
+
 [[tools.deno]]
 version = "2.9.4"
 backend = "core:deno"
