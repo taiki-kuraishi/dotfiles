@@ -94,6 +94,7 @@
       # mise アクティベート（ツールは ~/.config/mise/config.toml + `mise install` で管理）
       command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
       command -v task >/dev/null 2>&1 && eval "$(task --completion zsh)"
+      command -v wt   >/dev/null 2>&1 && eval "$(command wt config shell init zsh)"
 
       # bun / npm / pnpm の補完（mise でツールが PATH に入った後に読み込む）
       command -v npm  >/dev/null && source <(npm completion)
