@@ -15,7 +15,8 @@
     "slack@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "notion@claude-plugins-official": true,
-    "cloudflare@claude-plugins-official": true
+    "cloudflare@claude-plugins-official": true,
+    "worktrunk@worktrunk": true
   },
   "extraKnownMarketplaces": {
     "ponytail": {
@@ -23,16 +24,29 @@
         "source": "github",
         "repo": "DietrichGebert/ponytail"
       }
+    },
+    "worktrunk": {
+      "source": {
+        "source": "github",
+        "repo": "max-sixty/worktrunk"
+      }
     }
   },
   "language": "日本語",
   "effortLevel": "xhigh",
+  "promptSuggestionEnabled": false,
+  "awaySummaryEnabled": false,
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
+  "editorMode": "normal",
+  "verbose": false,
   "preferredNotifChannel": "terminal_bell",
+  "autoCompactEnabled": true,
+  "fileCheckpointingEnabled": false,
   "remoteControlAtStartup": false,
+  "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
 }
