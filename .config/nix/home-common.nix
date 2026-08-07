@@ -59,6 +59,8 @@
     # sops が使う age 復号鍵のパス（age のデフォルト保存先）
     SOPS_AGE_KEYFILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
     GOOGLE_CLOUD_PROJECT = "gen-lang-client-0186675745";
+    # claude code のマウスキャプチャを無効化し、ターミナル本来のテキスト選択を使えるようにする
+    CLAUDE_CODE_DISABLE_MOUSE = "1";
   };
 
   # PATH（.local/bin は共通。opencode / homebrew は macOS のみ）
