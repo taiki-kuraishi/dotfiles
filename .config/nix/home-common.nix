@@ -37,8 +37,9 @@
       ghq
       # レビュー向けターミナル diff ビューア（nixpkgs 未収録。flake.nix の overlay 経由）
       hunk
-      # docker CLI クライアント。デーモンは nix/HM では管理せず外部が提供する
-      # （macOS: OrbStack / Dory 等、Linux: Pod 側）。
+      # docker CLI クライアント。デーモンは nix/HM では管理しない
+      # （macOS: OrbStack / Dory 等が外部提供。Linux: Pod 側が提供、
+      #   それが無い一般ディストリでは bootstrap##os.Linux が導入する）。
       docker
       kubectl
       # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド

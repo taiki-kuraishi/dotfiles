@@ -33,3 +33,15 @@ fi
 # 6. bunx skills をグローバルインストール(bun は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
 #    欲しい skill はここに明示的に追加する(lockfile からの復元ではなく宣言的に管理)。
 mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
+
+# 7. Docker Engine（rootful）。dockerd 未導入 かつ systemd あり かつ
+#    非対話 sudo が使える場合のみ導入する no-op safe なステップ。
+#    Pod・CI ランナー（既に導入済み）や systemd の無い環境、sudo の無い環境では何もしない。
+if ! command -v dockerd >/dev/null 2>&1 \
+  && [ -d /run/systemd/system ] \
+  && sudo -n true 2>/dev/null; then
+  curl -fsSL https://get.docker.com | sudo sh
+  sudo systemctl enable --now docker
+  sudo usermod -aG docker "$(whoami)"
+  echo "Added to docker group. Log out and back in for it to take effect." >&2
+fi
