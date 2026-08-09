@@ -53,6 +53,9 @@
       # PATH 上で cc を覆い、macOS SDK の libiconv 等を解決できずリンクが壊れる
       # （例: cargo build が `ld: library not found for -liconv` で落ちる）。
       gcc
+      # roppoh dev-pod: dockerd の overlay2 が Pod 内では使えない（overlay-on-overlay を
+      # カーネルが拒否）ため fuse-overlayfs で代替。無ければ vfs にフォールバックする想定。
+      fuse-overlayfs
     ];
 
   # 環境変数
