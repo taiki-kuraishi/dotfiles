@@ -33,13 +33,30 @@
   };
 
   # ---------------------------------------------------------------------
-  # Homebrew 連携設定（GUI casks のみ。CLI ツールは Home Manager(nix) 側で管理）
+  # Homebrew 連携設定（GUI casks が中心。CLI ツールは基本 Home Manager(nix) 側で管理するが、
+  # 公式署名済みビルドが必要なものはこちらで管理する）
   # ---------------------------------------------------------------------
   homebrew = {
     enable = true;
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
+    # サードパーティ tap（tinycast は nixpkgs 未収録のため cask 経由で導入）
+    # trusted = true で brew trust 相当を activation 時に自動適用する
+    taps = [
+      {
+        name = "abue-ammar/tinycast";
+        trusted = true;
+      }
+    ];
+    # bitwarden-cli は bitwarden(GUI, 下記cask)と揃えるため brew で管理する。
+    brews = [ "bitwarden-cli" ];
     # ghostty は nixpkgs の darwin ビルドが unavailable のため cask で導入する。
-    casks = [ "ghostty" ];
+    # bitwarden は nixpkgs 版が ad-hoc 署名のため、macOS の SSH Agent 拡張機能への
+    # 登録ができない（公式署名済みビルドが必要）ため cask で導入する。
+    casks = [
+      "ghostty"
+      "tinycast"
+      "bitwarden"
+    ];
   };
 }
