@@ -45,6 +45,7 @@
       # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
       # （例: better-sqlite3 の node-gyp フォールバック）用の最低限のツールチェイン。
       gnumake
+      pkg-config
       python3
     ]
     ++ lib.optionals stdenv.isLinux [
