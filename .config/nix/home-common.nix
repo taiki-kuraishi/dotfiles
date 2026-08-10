@@ -42,6 +42,7 @@
       #   それが無い一般ディストリでは bootstrap##os.Linux が導入する）。
       docker
       kubectl
+      google-cloud-sdk
       # roppoh Pod の Dockerfile から移設。mise が入れる node/bun 等のネイティブビルド
       # （例: better-sqlite3 の node-gyp フォールバック）用の最低限のツールチェイン。
       gnumake
