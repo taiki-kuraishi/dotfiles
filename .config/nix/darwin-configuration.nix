@@ -53,10 +53,16 @@
     # ghostty は nixpkgs の darwin ビルドが unavailable のため cask で導入する。
     # bitwarden は nixpkgs 版が ad-hoc 署名のため、macOS の SSH Agent 拡張機能への
     # 登録ができない（公式署名済みビルドが必要）ため cask で導入する。
+    # karabiner-elements は仮想HIDデバイスドライバー（システム拡張）の承認が必要なため、
+    # 公式の署名済みビルドを使う cask で導入する。
+    # stats は brew cask 版が自動更新に対応しているため cask で導入する。
     casks = [
       "ghostty"
       "tinycast"
       "bitwarden"
+      "karabiner-elements"
+      "stats"
+      "orbstack"
     ];
   };
 }
