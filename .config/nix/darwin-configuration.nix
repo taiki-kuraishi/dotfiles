@@ -49,13 +49,19 @@
       }
     ];
     # bitwarden-cli は bitwarden(GUI, 下記cask)と揃えるため brew で管理する。
-    brews = [ "bitwarden-cli" ];
+    # tailscale は PATH の通った CLI を使うため formula も入れる（デーモンは GUI 側を使う）。
+    brews = [
+      "bitwarden-cli"
+      "tailscale"
+    ];
     # ghostty は nixpkgs の darwin ビルドが unavailable のため cask で導入する。
     # bitwarden は nixpkgs 版が ad-hoc 署名のため、macOS の SSH Agent 拡張機能への
     # 登録ができない（公式署名済みビルドが必要）ため cask で導入する。
     # karabiner-elements は仮想HIDデバイスドライバー（システム拡張）の承認が必要なため、
     # 公式の署名済みビルドを使う cask で導入する。
     # stats は brew cask 版が自動更新に対応しているため cask で導入する。
+    # tailscale-app は VPN のシステム拡張の承認が必要なため、公式の署名済みビルドを
+    # 使う cask で導入する（cask 名は tailscale からリネーム済み）。
     casks = [
       "ghostty"
       "tinycast"
@@ -63,6 +69,7 @@
       "karabiner-elements"
       "stats"
       "orbstack"
+      "tailscale-app"
     ];
   };
 }
