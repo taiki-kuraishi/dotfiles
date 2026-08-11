@@ -25,3 +25,12 @@ rust = "latest"
 npm.bun = true
 idiomatic_version_file_enable_tools = ["python"]
 lockfile = true
+
+[env]
+# openssl-sys (needed to build worker-build for the roppoh sim-server crate)
+# looks for openssl.pc via pkg-config, and the resulting binary dynamically
+# links libssl.so.3 at runtime. openssl only exists as a nix profile package
+# here (no system libssl-dev/pkg-config), and its files live outside the
+# default pkg-config/ld.so search paths.
+PKG_CONFIG_PATH = "{{env.HOME}}/.nix-profile/lib/pkgconfig"
+LD_LIBRARY_PATH = "{{env.HOME}}/.nix-profile/lib"
