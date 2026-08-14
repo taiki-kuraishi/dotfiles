@@ -71,6 +71,9 @@
     # 使う cask で導入する（cask 名は tailscale からリネーム済み）。
     # aerospace は nixpkgs 未収録のため公式 tap 埋め込みのフルネームで cask 導入する
     # （tap を別途宣言しないため、cask 側で trusted = true が必要）。
+    # font-sketchybar-app-font は SketchyBar のワークスペースitemにアプリアイコンを
+    # 表示するための専用フォント（homebrew-cask 公式 tap 収録のため trusted 不要）。
+    # jordanbaird-ice はメニューバーアイコンの整理用（同様に公式 tap 収録）。
     casks = [
       "ghostty"
       "tinycast"
@@ -79,6 +82,8 @@
       "stats"
       "orbstack"
       "tailscale-app"
+      "font-sketchybar-app-font"
+      "jordanbaird-ice"
       {
         name = "nikitabobko/tap/aerospace";
         trusted = true;
