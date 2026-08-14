@@ -85,6 +85,15 @@ gaps.outer.bottom =     0
 gaps.outer.top =        0
 gaps.outer.right =      0
 
+# Ghostty's native macOS tabs are reported as separate windows, which makes
+# AeroSpace re-tile the whole window on every tab switch. Starting it floating
+# avoids the retile (partial workaround: only the first tab stays tiled, see
+# https://github.com/nikitabobko/AeroSpace/issues/887).
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+check-further-callbacks = true
+run = ['layout floating']
+
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 # 'main' binding mode must be always presented
