@@ -41,18 +41,25 @@
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
     # サードパーティ tap（tinycast は nixpkgs 未収録のため cask 経由で導入）
+    # FelixKratz/formulae は sketchybar(下記brew)の配布元 tap のため追加する。
     # trusted = true で brew trust 相当を activation 時に自動適用する
     taps = [
       {
         name = "abue-ammar/tinycast";
         trusted = true;
       }
+      {
+        name = "FelixKratz/formulae";
+        trusted = true;
+      }
     ];
     # bitwarden-cli は bitwarden(GUI, 下記cask)と揃えるため brew で管理する。
     # tailscale は PATH の通った CLI を使うため formula も入れる（デーモンは GUI 側を使う）。
+    # sketchybar は上記 FelixKratz/formulae tap 経由で導入する menu bar ツール。
     brews = [
       "bitwarden-cli"
       "tailscale"
+      "sketchybar"
     ];
     # ghostty は nixpkgs の darwin ビルドが unavailable のため cask で導入する。
     # bitwarden は nixpkgs 版が ad-hoc 署名のため、macOS の SSH Agent 拡張機能への
@@ -62,6 +69,8 @@
     # stats は brew cask 版が自動更新に対応しているため cask で導入する。
     # tailscale-app は VPN のシステム拡張の承認が必要なため、公式の署名済みビルドを
     # 使う cask で導入する（cask 名は tailscale からリネーム済み）。
+    # aerospace は nixpkgs 未収録のため公式 tap 埋め込みのフルネームで cask 導入する
+    # （tap を別途宣言しないため、cask 側で trusted = true が必要）。
     casks = [
       "ghostty"
       "tinycast"
@@ -70,6 +79,10 @@
       "stats"
       "orbstack"
       "tailscale-app"
+      {
+        name = "nikitabobko/tap/aerospace";
+        trusted = true;
+      }
     ];
   };
 }
