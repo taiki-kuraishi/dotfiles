@@ -73,7 +73,9 @@
     # （tap を別途宣言しないため、cask 側で trusted = true が必要）。
     # font-sketchybar-app-font は SketchyBar のワークスペースitemにアプリアイコンを
     # 表示するための専用フォント（homebrew-cask 公式 tap 収録のため trusted 不要）。
-    # jordanbaird-ice はメニューバーアイコンの整理用（同様に公式 tap 収録）。
+    # thaw はメニューバーアイコンの整理用。jordanbaird-ice(Ice)は macOS 26 で
+    # NSStatusBarWindow 周りが頻繁にクラッシュするため、同じ Ice 系統で macOS 26/27
+    # 対応を謳う OSS フォークの thaw に乗り換えた（同様に公式 tap 収録）。
     casks = [
       "ghostty"
       "tinycast"
@@ -83,7 +85,7 @@
       "orbstack"
       "tailscale-app"
       "font-sketchybar-app-font"
-      "jordanbaird-ice"
+      "thaw"
       {
         name = "nikitabobko/tap/aerospace";
         trusted = true;
