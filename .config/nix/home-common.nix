@@ -27,6 +27,7 @@
       mise
       gh
       jq
+      jaq
       less
       ripgrep
       fd
@@ -84,6 +85,18 @@
   # プロンプト（starship は yadm 管理の設定が無いので HM に任せてよい）
   programs.starship.enable = true;
 
+  # cd を zoxide 化（--cmd cd で cd 自体を置き換え、通常の cd としても動く）
+  programs.zoxide = {
+    enable = true;
+    options = [
+      "--cmd"
+      "cd"
+    ];
+  };
+
+  # cat のシンタックスハイライト版。設定ファイルは持たない（yadm 管理外）
+  programs.bat.enable = true;
+
   programs.zsh = {
     enable = true;
 
@@ -92,6 +105,10 @@
       do = "docker";
       doc = "docker compose";
       mtr = "mise tasks run";
+      # 対話シェルのみに効く。statusline-command.sh 等の非対話実行は
+      # 実体の jq/cat バイナリを直接使うため影響を受けない
+      cat = "bat --paging=never";
+      jq = "jaq";
     }
     // lib.optionalAttrs pkgs.stdenv.isDarwin {
       # Tailscale.app 同梱の CLI（Homebrew 版と違い GUI 連携込みで動く）を使う
