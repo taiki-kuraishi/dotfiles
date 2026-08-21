@@ -9,6 +9,11 @@
 	signingkey = ~/.ssh/id_ed25519.pub
 [gpg]
 	format = ssh
+# 個人・会社の両方の公開鍵を列挙する。これが無いと、署名は正しく付いていても
+# git log --show-signature が "No signature" とエラーを返す（検証不能なだけで
+# 未署名ではない点に注意）。
+[gpg "ssh"]
+	allowedSignersFile = ~/.config/git/allowed_signers
 [commit]
 	gpgsign = true
 [alias]

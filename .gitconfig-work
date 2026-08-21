@@ -1,0 +1,13 @@
+[user]
+	name = t-kuraishi_fancs
+	# noreply を使う。会社ドメインの実アドレスを PUBLIC な dotfiles repo に
+	# 載せないため。EMU アカウントの id は gh api /user で確認した値。
+	email = 249696633+t-kuraishi_fancs@users.noreply.github.com
+	# 署名鍵も個人と分ける。コミットの Verified 判定は「author の email が
+	# 属するアカウント」に登録された鍵で照合されるため、会社 EMU アカウント側に
+	# 登録した鍵で署名しないと Unverified のままになる。
+	signingkey = ~/.ssh/id_ed25519_fancs.pub
+[credential "https://github.com"]
+	username = t-kuraishi_fancs
+	helper =
+	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user t-kuraishi_fancs)\"; }; f"
