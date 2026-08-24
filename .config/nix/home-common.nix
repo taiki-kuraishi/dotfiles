@@ -58,10 +58,6 @@
       # roppoh dev-pod: dockerd の overlay2 が Pod 内では使えない（overlay-on-overlay を
       # カーネルが拒否）ため fuse-overlayfs で代替。無ければ vfs にフォールバックする想定。
       fuse-overlayfs
-    ]
-    ++ lib.optionals stdenv.isDarwin [
-      # GUI アプリのため macOS のみ。Linux 側（roppoh Pod / CI）は headless なので入れない。
-      zed-editor
     ];
 
   # 環境変数
