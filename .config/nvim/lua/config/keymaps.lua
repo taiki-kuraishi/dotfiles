@@ -16,3 +16,10 @@ vim.api.nvim_create_user_command("CopyAbsPath", function()
   vim.fn.setreg("+", result)
   vim.notify("Copied: " .. result)
 end, { desc = "Copy absolute path:line to clipboard" })
+
+-- 右クリックメニュー (:h popup-menu) に path コピーを追加
+vim.cmd([[
+  anoremenu 1.100 PopUp.Copy\ Relative\ Path  <Cmd>CopyRelPath<CR>
+  anoremenu 1.110 PopUp.Copy\ Absolute\ Path  <Cmd>CopyAbsPath<CR>
+  anoremenu 1.120 PopUp.-copypath-            <Nop>
+]])
