@@ -73,6 +73,8 @@
     # （tap を別途宣言しないため、cask 側で trusted = true が必要）。
     # font-sketchybar-app-font は SketchyBar のワークスペースitemにアプリアイコンを
     # 表示するための専用フォント（homebrew-cask 公式 tap 収録のため trusted 不要）。
+    # font-hackgen-nerd は Ghostty 用の日本語対応等幅フォント（Nerd Font アイコン込み）。
+    # Ghostty 組み込みの JetBrains Mono が CJK 非対応で日本語表示が崩れるため導入する。
     casks = [
       "ghostty"
       "tinycast"
@@ -82,6 +84,7 @@
       "orbstack"
       "tailscale-app"
       "font-sketchybar-app-font"
+      "font-hackgen-nerd"
       {
         name = "nikitabobko/tap/aerospace";
         trusted = true;
