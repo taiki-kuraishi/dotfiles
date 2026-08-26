@@ -25,16 +25,24 @@ export PATH="$HOME/.nix-profile/bin:$PATH"
 # 4. mise 管理ツール（~/.config/mise/config.toml に従う。mise 本体は HM 導入済み）。
 mise install --yes
 
-# 5. Claude Code(ネイティブバイナリ。~/.local 配下に入り、以後は自己更新される)。
+# 5. sops 管理の秘密情報(会社用 gitconfig, opencode)を復号(~/.mise-tasks/decrypt)。
+#    age 鍵は yadm 管理外。先に Bitwarden から復元しておく。無ければスキップする。
+if [ -f "$HOME/.config/sops/age/keys.txt" ]; then
+  mise -y -C "$HOME" run decrypt
+else
+  echo "warning: $HOME/.config/sops/age/keys.txt not found; skipping sops decrypt (run: mise run decrypt)" >&2
+fi
+
+# 6. Claude Code(ネイティブバイナリ。~/.local 配下に入り、以後は自己更新される)。
 if [ ! -x "$HOME/.local/bin/claude" ]; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
 
-# 6. bunx skills をグローバルインストール(bun は mise で導入済み。Darwin bootstrap の手順 3 と同等)。
+# 7. bunx skills をグローバルインストール(bun は mise で導入済み。Darwin bootstrap の手順 4 と同等)。
 #    欲しい skill はここに明示的に追加する(lockfile からの復元ではなく宣言的に管理)。
 mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
 
-# 7. Docker Engine（rootful）。dockerd 未導入 かつ systemd あり かつ
+# 8. Docker Engine（rootful）。dockerd 未導入 かつ systemd あり かつ
 #    非対話 sudo が使える場合のみ導入する no-op safe なステップ。
 #    Pod・CI ランナー（既に導入済み）や systemd の無い環境、sudo の無い環境では何もしない。
 if ! command -v dockerd >/dev/null 2>&1 \

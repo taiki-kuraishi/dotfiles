@@ -29,10 +29,18 @@ sudo env "PATH=$PATH" "NIX_CONFIG=${NIX_CONFIG:-}" nix --extra-experimental-feat
 # 2. Install mise-managed tools.
 if command -v mise >/dev/null 2>&1; then
   mise install
+
+  # 3. Decrypt sops-managed secrets (work gitconfig, opencode) via ~/.mise-tasks/decrypt.
+  #    The age key is not tracked; restore it from Bitwarden first, otherwise this is skipped.
+  if [ -f "$HOME/.config/sops/age/keys.txt" ]; then
+    mise -y -C "$HOME" run decrypt
+  else
+    echo "warning: $HOME/.config/sops/age/keys.txt not found; skipping sops decrypt (run: mise run decrypt)" >&2
+  fi
 fi
 
-# 3. Install bunx skills (https://github.com/vercel-labs/skills), declared explicitly here
-#    (not restored from a lockfile — same list as the Linux bootstrap step 6).
+# 4. Install bunx skills (https://github.com/vercel-labs/skills), declared explicitly here
+#    (not restored from a lockfile — same list as the Linux bootstrap step 7).
 if command -v bunx >/dev/null 2>&1; then
   bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
 fi
