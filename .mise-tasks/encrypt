@@ -5,7 +5,9 @@
 # コメントが壊れるため、バイト列ごと暗号化する。
 set -euo pipefail
 
-AGE_RECIPIENT="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef"
+# local (taiki-kuraishi) と roppoh dev-pod の 2 鍵。dev-pod には k8s が
+# ~/.config/sops/age/keys.txt に専用鍵をマウントする (roppoh k8s/dev-pod/statefulset.yaml)。
+AGE_RECIPIENTS="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef,age1w9ag9ll407vz0xxjx7mev97vsdgmhp73mn6md98etms7adgk540s4xv8k8"
 FILES=(
   "$HOME/.config/opencode/opencode.jsonc:json"
   "$HOME/.gitconfig.local:binary"
@@ -16,5 +18,5 @@ for entry in "${FILES[@]}"; do
   src="${entry%:*}" type="${entry##*:}" dst="${entry%:*}.sops.yaml"
   [ -f "$src" ] || { echo "error: $src does not exist" >&2; exit 1; }
   echo "Encrypting $src -> $dst"
-  sops --encrypt --age "$AGE_RECIPIENT" --input-type "$type" --output-type yaml "$src" > "$dst"
+  sops --encrypt --age "$AGE_RECIPIENTS" --input-type "$type" --output-type yaml "$src" > "$dst"
 done
