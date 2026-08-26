@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="Decrypt sops-managed secrets (opencode.jsonc, .gitconfig.local, .gitconfig-work)"
+# <平文>.sops.yaml -> 平文。encrypt と同じ一覧を持つ ("path:sops-type")。
+# yadm bootstrap からも呼ばれる (age 鍵 $SOPS_AGE_KEY_FILE が必要)。
+set -euo pipefail
+umask 077 # 復号した平文は秘密情報なので 0600 で書き出す
+
+FILES=(
+  "$HOME/.config/opencode/opencode.jsonc:json"
+  "$HOME/.gitconfig.local:binary"
+  "$HOME/.gitconfig-work:binary"
+)
+
+for entry in "${FILES[@]}"; do
+  dst="${entry%:*}" type="${entry##*:}" src="${entry%:*}.sops.yaml"
+  [ -f "$src" ] || { echo "error: $src does not exist" >&2; exit 1; }
+  echo "Decrypting $src -> $dst"
+  # 入力形式は拡張子(.yaml)から推定させる。tmp 経由で書き、失敗時に既存の平文を壊さない
+  sops --decrypt --output-type "$type" "$src" > "$dst.tmp" && mv "$dst.tmp" "$dst"
+done

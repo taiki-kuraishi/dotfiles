@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="Encrypt sops-managed secrets (opencode.jsonc, .gitconfig.local, .gitconfig-work)"
+# 平文 -> <平文>.sops.yaml。decrypt と同じ一覧を持つ ("path:sops-type")。
+# gitconfig は binary 扱い: sops の ini ストアだと重複キー(helper = の空リセット)や
+# コメントが壊れるため、バイト列ごと暗号化する。
+set -euo pipefail
+
+AGE_RECIPIENT="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef"
+FILES=(
+  "$HOME/.config/opencode/opencode.jsonc:json"
+  "$HOME/.gitconfig.local:binary"
+  "$HOME/.gitconfig-work:binary"
+)
+
+for entry in "${FILES[@]}"; do
+  src="${entry%:*}" type="${entry##*:}" dst="${entry%:*}.sops.yaml"
+  [ -f "$src" ] || { echo "error: $src does not exist" >&2; exit 1; }
+  echo "Encrypting $src -> $dst"
+  sops --encrypt --age "$AGE_RECIPIENT" --input-type "$type" --output-type yaml "$src" > "$dst"
+done
