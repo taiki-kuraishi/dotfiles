@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
-#MISE description="Encrypt sops-managed secrets (opencode.jsonc, .gitconfig.local, .gitconfig-work)"
-# 平文 -> <平文>.sops.yaml。decrypt と同じ一覧を持つ ("path:sops-type")。
-# gitconfig は binary 扱い: sops の ini ストアだと重複キー(helper = の空リセット)や
+#MISE description="Encrypt sops-managed secrets (opencode.jsonc, gitconfig work files, ssh signing keys)"
+# 平文 -> <平文>.sops.yaml。decrypt と同じ一覧を持つ ("path:sops-type:recipients")。
+# gitconfig / ssh 鍵は binary 扱い: sops の ini ストアだと重複キー(helper = の空リセット)や
 # コメントが壊れるため、バイト列ごと暗号化する。
 set -euo pipefail
 
-# local (taiki-kuraishi) と roppoh dev-pod の 2 鍵。dev-pod には k8s が
-# ~/.config/sops/age/keys.txt に専用鍵をマウントする (roppoh k8s/dev-pod/statefulset.yaml)。
-AGE_RECIPIENTS="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef,age1w9ag9ll407vz0xxjx7mev97vsdgmhp73mn6md98etms7adgk540s4xv8k8"
+# local: taiki-kuraishi のマシン。dev-pod: roppoh dev-pod が ~/.config/sops/age/keys.txt に
+# マウントする専用鍵(roppoh k8s/dev-pod/statefulset.yaml)。SSH 鍵は dev-pod が独自の
+# 署名鍵(dev-pod_signing)を持つため local のみ。
+LOCAL="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef"
+DEV_POD="age1w9ag9ll407vz0xxjx7mev97vsdgmhp73mn6md98etms7adgk540s4xv8k8"
 FILES=(
-  "$HOME/.config/opencode/opencode.jsonc:json"
-  "$HOME/.gitconfig.local:binary"
-  "$HOME/.gitconfig-work:binary"
+  "$HOME/.config/opencode/opencode.jsonc:json:$LOCAL,$DEV_POD"
+  "$HOME/.gitconfig-work-orgs:binary:$LOCAL,$DEV_POD"
+  "$HOME/.gitconfig-work:binary:$LOCAL,$DEV_POD"
+  "$HOME/.ssh/id_ed25519:binary:$LOCAL"
+  "$HOME/.ssh/id_ed25519_fancs:binary:$LOCAL"
 )
 
 for entry in "${FILES[@]}"; do
-  src="${entry%:*}" type="${entry##*:}" dst="${entry%:*}.sops.yaml"
+  IFS=: read -r src type recipients <<<"$entry"
+  dst="$src.sops.yaml"
   [ -f "$src" ] || { echo "error: $src does not exist" >&2; exit 1; }
   echo "Encrypting $src -> $dst"
-  sops --encrypt --age "$AGE_RECIPIENTS" --input-type "$type" --output-type yaml "$src" > "$dst"
+  sops --encrypt --age "$recipients" --input-type "$type" --output-type yaml "$src" > "$dst"
 done

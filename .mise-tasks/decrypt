@@ -1,19 +1,31 @@
 #!/usr/bin/env bash
-#MISE description="Decrypt sops-managed secrets (opencode.jsonc, .gitconfig.local, .gitconfig-work)"
-# <平文>.sops.yaml -> 平文。encrypt と同じ一覧を持つ ("path:sops-type")。
+#MISE description="Decrypt sops-managed secrets (opencode.jsonc, gitconfig work files, ssh signing keys)"
+# <平文>.sops.yaml -> 平文。encrypt と同じ一覧を持つ ("path:sops-type:recipients")。
 # yadm bootstrap からも呼ばれる (age 鍵 $SOPS_AGE_KEY_FILE が必要)。
 set -euo pipefail
 umask 077 # 復号した平文は秘密情報なので 0600 で書き出す
 
 FILES=(
   "$HOME/.config/opencode/opencode.jsonc:json"
-  "$HOME/.gitconfig.local:binary"
+  "$HOME/.gitconfig-work-orgs:binary"
   "$HOME/.gitconfig-work:binary"
+  "$HOME/.ssh/id_ed25519:binary"
+  "$HOME/.ssh/id_ed25519_fancs:binary"
 )
 
+# 手元の age 鍵の公開鍵一覧。recipient に含まれないファイル(例: dev-pod での SSH 鍵)は
+# エラーにせずスキップする。
+KEY_FILE="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
+MY_PUBKEYS="$(age-keygen -y "$KEY_FILE")"
+
 for entry in "${FILES[@]}"; do
-  dst="${entry%:*}" type="${entry##*:}" src="${entry%:*}.sops.yaml"
+  IFS=: read -r dst type <<<"$entry"
+  src="$dst.sops.yaml"
   [ -f "$src" ] || { echo "error: $src does not exist" >&2; exit 1; }
+  if ! grep -qF -f <(printf '%s\n' "$MY_PUBKEYS") "$src"; then
+    echo "Skipping $src (this machine's age key is not a recipient)"
+    continue
+  fi
   echo "Decrypting $src -> $dst"
   # 入力形式は拡張子(.yaml)から推定させる。tmp 経由で書き、失敗時に既存の平文を壊さない
   sops --decrypt --output-type "$type" "$src" > "$dst.tmp" && mv "$dst.tmp" "$dst"
