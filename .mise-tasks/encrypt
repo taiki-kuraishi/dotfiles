@@ -6,16 +6,15 @@
 set -euo pipefail
 
 # local: taiki-kuraishi のマシン。dev-pod: roppoh dev-pod が ~/.config/sops/age/keys.txt に
-# マウントする専用鍵(roppoh k8s/dev-pod/statefulset.yaml)。SSH 鍵は dev-pod が独自の
-# 署名鍵(dev-pod_signing)を持つため local のみ。
+# マウントする専用鍵(roppoh k8s/dev-pod/statefulset.yaml)。全ファイル両鍵で復号可能にする。
 LOCAL="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef"
 DEV_POD="age1w9ag9ll407vz0xxjx7mev97vsdgmhp73mn6md98etms7adgk540s4xv8k8"
 FILES=(
   "$HOME/.config/opencode/opencode.jsonc:json:$LOCAL,$DEV_POD"
   "$HOME/.gitconfig-work-orgs:binary:$LOCAL,$DEV_POD"
   "$HOME/.gitconfig-work:binary:$LOCAL,$DEV_POD"
-  "$HOME/.ssh/id_ed25519:binary:$LOCAL"
-  "$HOME/.ssh/id_ed25519_fancs:binary:$LOCAL"
+  "$HOME/.ssh/id_ed25519:binary:$LOCAL,$DEV_POD"
+  "$HOME/.ssh/id_ed25519_fancs:binary:$LOCAL,$DEV_POD"
 )
 
 for entry in "${FILES[@]}"; do
