@@ -122,6 +122,18 @@
       command -v npm  >/dev/null && source <(npm completion)
       command -v pnpm >/dev/null && source <(pnpm completion zsh)
       command -v bun  >/dev/null && source <(bun completions)
+
+      # gh を「リポジトリの org」に応じたアカウントで動かす。
+      gh() {
+        local url org u
+        url=$(command git config --get remote.origin.url 2>/dev/null)
+        org=$(basename "$(dirname "$url")")
+        case "$org" in
+          fancomi-interconnect|a8-engineer|fancs-product-mgmt|t-kuraishi_fancs) u="t-kuraishi_fancs" ;;
+          *)                                                 u="taiki-kuraishi"   ;;
+        esac
+        GH_TOKEN="$(command gh auth token --user "$u" 2>/dev/null)" command gh "$@"
+      }
     ''
     + lib.optionalString pkgs.stdenv.isDarwin ''
 
@@ -131,22 +143,11 @@
       # Tailscale.app 同梱 CLI の zsh 補完（alias 経由で PATH 上に無いため実体パスで判定）
       [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ] \
         && source <("/Applications/Tailscale.app/Contents/MacOS/Tailscale" completion zsh)
-
-      # gh を「リポジトリの org」に応じたアカウントで動かす（macOS のみ）。
-      gh() {
-        local url org u
-        url=$(command git config --get remote.origin.url 2>/dev/null)
-        org=$(basename "$(dirname "$url")")
-        case "$org" in
-          fancomi-interconnect|a8-engineer|t-kuraishi_fancs) u="t-kuraishi_fancs" ;;
-          *)                                                 u="taiki-kuraishi"   ;;
-        esac
-        GH_TOKEN="$(command gh auth token --user "$u" 2>/dev/null)" command gh "$@"
-      }
     ''
     + lib.optionalString pkgs.stdenv.isLinux ''
 
-      # gh を GitHub App の短命トークンで動かす（gh-app-token は Pod にのみ存在）
+      # gh-app-token があれば GitHub App の短命トークンで上書きする（Pod にのみ存在）。
+      # 無ければ上で定義した org 判定ベースの gh() をそのまま使う。
       if command -v gh-app-token >/dev/null 2>&1; then
         gh() { GH_TOKEN="$(gh-app-token)" command gh "$@"; }
       fi
