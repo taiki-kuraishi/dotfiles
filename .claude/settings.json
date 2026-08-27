@@ -3,7 +3,7 @@
     "deny": [],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "sonnet",
   "hooks": {},
   "statusLine": {
     "type": "command",
@@ -39,7 +39,6 @@
       "effortLevel": "xhigh"
     }
   },
-  "advisorModel": "fable",
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": false,
   "tui": "fullscreen",
@@ -48,6 +47,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
   "editorMode": "normal",
+  "outputStyle": "Concise",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell",
   "autoCompactEnabled": true,
