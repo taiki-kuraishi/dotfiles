@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "0 0 * * 1" # 毎週月曜 00:00 UTC（上流変化での破綻検知）
+    - cron: "0 0 * * 1"
 
 concurrency:
   group: bootstrap-${{ github.ref }}
@@ -14,53 +14,41 @@ concurrency:
 
 jobs:
   macos:
-    runs-on: macos-26 # arm64 = aarch64-darwin（flake の hostPlatform に一致）
+    runs-on: macos-26
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # file:// clone で確実に対象コミットを展開するため全履歴
+          fetch-depth: 0
 
-      # 前提① nix（公式/upstream 版）を導入。Determinate デーモンは nix-darwin と競合するため無効化
       - uses: DeterminateSystems/nix-installer-action@main
         with:
           determinate: false
           extra-conf: |
             experimental-features = nix-command flakes
 
-      # 前提② yadm を導入（Homebrew はランナーにプリインストール済み＝前提③を満たす）
       - name: Install yadm
         run: brew install yadm
 
-      # flake の darwinConfigurations.ci-runner を選択させる
       - name: Set CI host identity
         run: sudo scutil --set LocalHostName ci-runner
 
-      # Determinate 版インストーラが作る /etc/nix/nix.custom.conf を退避（nix-darwin が
-      # 見覚えのない custom 設定を検出すると activation を中断するため）。
       - name: Move aside Determinate custom nix.conf (nix-darwin takeover)
         run: sudo mv /etc/nix/nix.custom.conf /etc/nix/nix.custom.conf.before-nix-darwin 2>/dev/null || true
 
-      # チェックアウトしたこのコミットを yadm 管理下($HOME)へ展開
       - name: Seed yadm repo from checkout
         run: |
           set -eux
           head_sha=$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)
           yadm clone -f --no-bootstrap "file://$GITHUB_WORKSPACE/.git"
           yadm reset --hard "$head_sha"
-          yadm alt # ##os.Darwin の alternates(bootstrap シンボリックリンク等)を実体化
+          yadm alt
 
-      # 本番の bootstrap を実行（nix-darwin switch まで）。非ゼロ終了で CI 失敗
-      # bootstrap 内で `nix run nix-darwin/master#darwin-rebuild` が未ピン留めの
-      # flake 参照を解決するたびに api.github.com を未認証で叩くため、Actions ランナー
-      # の共有 IP だと rate limit (60 req/h) に達しやすい。GITHUB_TOKEN で認証させる。
       - name: Run yadm bootstrap
         env:
           NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
         run: yadm bootstrap
 
-      # 導入結果の簡易確認（失敗しても本体判定は上の step で済んでいるので tolerant）
-      # gh/mise/cloudflared は Home Manager(nix) 側に移動したので HM プロファイルも PATH に含める。
       - name: Verify toolchain
         run: |
           set -x
@@ -70,13 +58,12 @@ jobs:
 
   linux:
     runs-on: ubuntu-latest
-    timeout-minutes: 40 # nix 導入 + Home Manager ビルドの分だけ余裕を持たせる
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      # 前提 nix（公式/upstream 版）を導入。bootstrap##os.Linux が `nix run` を呼ぶため必須。
       - uses: DeterminateSystems/nix-installer-action@main
         with:
           determinate: false
@@ -92,11 +79,8 @@ jobs:
           head_sha=$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)
           yadm clone -f --no-bootstrap "file://$GITHUB_WORKSPACE/.git"
           yadm reset --hard "$head_sha"
-          yadm alt # ##os.Linux の alternates を実体化
+          yadm alt
 
-      # Linux bootstrap は非対話(mise install --yes)・sudo 不要。exit code で判定
-      # macos 側と同様、bootstrap 内の `nix run github:nix-community/home-manager`
-      # も未ピン留めの flake 参照で api.github.com を未認証で叩くため、GITHUB_TOKEN で認証させる。
       - name: Run yadm bootstrap
         env:
           NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"

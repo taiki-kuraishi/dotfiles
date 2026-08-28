@@ -23,14 +23,11 @@ jobs:
           extra-conf: |
             experimental-features = nix-command flakes
 
-      # yadm の pre_commit フックと同じコマンド（nixfmt）で、整形済みかを確認する
       - name: nixfmt --check
         env:
           NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
         run: nix run nixpkgs#nixfmt -- --check $(git ls-files '*.nix')
 
-      # yadm の pre_commit フックと同じコマンド（dprint）で、整形済みかを確認する。
-      # karabiner.json 等 GUI アプリが書き換えるファイルは dprint.json 側の excludes で除外済み。
       - name: dprint check
         env:
           NIX_CONFIG: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
@@ -48,7 +45,6 @@ jobs:
       - name: Install bats
         run: sudo apt-get update && sudo apt-get install -y bats
 
-      # gh / stty はテスト内でモック済みなので、追加のセットアップや認証は不要
       - name: Run statusline display tests
         run: bats .claude/statusline-command.bats
 
@@ -103,10 +99,6 @@ jobs:
           extra-conf: |
             experimental-features = nix-command flakes
 
-      # flake.lock は commit 済みのためビルドはしない（実機 aarch64-darwin 不要）。
-      # evaluate だけで config 全体（home-manager の zsh モジュールのバグのような
-      # option 未定義エラーを含む）が踏めるので、bootstrap.yml が実行しない
-      # macbook-air / RN2162 / user-*-linux もここで検知できる。
       - name: Evaluate darwinConfigurations.${{ matrix.name }}
         if: matrix.kind == 'darwin'
         env:

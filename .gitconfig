@@ -9,9 +9,6 @@
 	signingkey = ~/.ssh/id_ed25519.pub
 [gpg]
 	format = ssh
-# 個人・会社の両方の公開鍵を列挙する。これが無いと、署名は正しく付いていても
-# git log --show-signature が "No signature" とエラーを返す（検証不能なだけで
-# 未署名ではない点に注意）。
 [gpg "ssh"]
 	allowedSignersFile = ~/.config/git/allowed_signers
 [commit]
@@ -50,11 +47,6 @@
 [ghq]
 	root = ~/Documents/ghq
 [credential "https://github.com"]
-	# デフォルトは個人アカウント (taiki-kuraishi) 固定。
-	# gh の標準 helper はアクティブアカウントのトークンしか返さないため、
-	# 指定アカウントのトークンを直接取得する。username も明示しないと
-	# git がユーザ名を対話プロンプトで要求してしまう点に注意。
-	# 会社 org 配下は ~/.gitconfig-work-orgs (sops 暗号化、includeIf を保持) → ~/.gitconfig-work で上書き。
 	username = taiki-kuraishi
 	helper =
 	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user taiki-kuraishi)\"; }; f"
@@ -62,10 +54,7 @@
 	username = taiki-kuraishi
 	helper =
 	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user taiki-kuraishi)\"; }; f"
-# 会社 org の includeIf (sops 暗号化。mise run decrypt で復元。無ければ黙って無視される)。
 [include]
 	path = ~/.gitconfig-work-orgs
-# マシン固有の上書き。末尾に置き、上の include より優先させる
-# (roppoh dev-pod は ConfigMap でマウントし user.signingkey を Pod 専用鍵に差し替える)。
 [include]
 	path = ~/.gitconfig.local

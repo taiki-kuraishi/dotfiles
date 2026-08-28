@@ -1,37 +1,19 @@
 #!/bin/sh
-# yadm bootstrap: provision a fresh machine after `yadm clone`.
 set -e
 
-# 1. Apply nix-darwin.
-#    The Nix installer writes /etc/nix/nix.conf and appends to the shell rc
-#    files; nix-darwin manages all of these and refuses to overwrite content it
-#    doesn't recognize on first activation. Move them aside (the originals are
-#    preserved as *.before-nix-darwin) so nix-darwin can take over.
 for f in /etc/nix/nix.conf /etc/bashrc /etc/zshrc; do
   if [ -f "$f" ] && [ ! -e "$f.before-nix-darwin" ]; then
     sudo mv "$f" "$f.before-nix-darwin"
   fi
 done
-# Use the flake-based first-run form (works before darwin-rebuild is on PATH).
-# `env PATH=$PATH` keeps nix on root's PATH under sudo.
-# Upstream Nix has flakes/nix-command off by default, so enable them for this
-# bootstrap run; nix-darwin's nix.settings.experimental-features makes them
-# permanent after the first activation.
-# Select the darwinConfiguration by this machine's hostname; it must be
-# registered in flake.nix (darwinConfigurations.<hostname>).
 HOSTNAME="$(scutil --get LocalHostName)"
-# sudo はデフォルトで環境変数をリセットするため、CI 側で GitHub API のレート制限回避に
-# 使う NIX_CONFIG (access-tokens) を明示的に引き渡す(ローカル実行時は未設定=空でよい)。
 sudo env "PATH=$PATH" "NIX_CONFIG=${NIX_CONFIG:-}" nix --extra-experimental-features 'nix-command flakes' \
   run nix-darwin/master#darwin-rebuild -- \
   switch --flake "$HOME/.config/nix#$HOSTNAME"
 
-# 2. Install mise-managed tools.
 if command -v mise >/dev/null 2>&1; then
   mise install
 
-  # 3. Decrypt sops-managed secrets (work gitconfig, opencode) via ~/.mise-tasks/decrypt.
-  #    The age key is not tracked; restore it from Bitwarden first, otherwise this is skipped.
   if [ -f "$HOME/.config/sops/age/keys.txt" ]; then
     mise -y -C "$HOME" run decrypt
   else
@@ -39,8 +21,6 @@ if command -v mise >/dev/null 2>&1; then
   fi
 fi
 
-# 4. Install bunx skills (https://github.com/vercel-labs/skills), declared explicitly here
-#    (not restored from a lockfile — same list as the Linux bootstrap step 7).
 if command -v bunx >/dev/null 2>&1; then
   bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
 fi

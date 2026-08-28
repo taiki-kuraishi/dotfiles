@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 #MISE description="Encrypt sops-managed secrets (opencode.jsonc, gitconfig work files, ssh signing keys)"
-# 平文 -> <平文>.sops.yaml。decrypt と同じ一覧を持つ ("path:sops-type:recipients")。
-# gitconfig / ssh 鍵は binary 扱い: sops の ini ストアだと重複キー(helper = の空リセット)や
-# コメントが壊れるため、バイト列ごと暗号化する。
 set -euo pipefail
 
-# local: taiki-kuraishi のマシン。dev-pod: roppoh dev-pod が ~/.config/sops/age/keys.txt に
-# マウントする専用鍵(roppoh k8s/dev-pod/statefulset.yaml)。全ファイル両鍵で復号可能にする。
 LOCAL="age12806kdsshuusvtl60jh7x5ggv7sk8l43lrsafmeyxkm0frj7cehsdnkuef"
 DEV_POD="age1w9ag9ll407vz0xxjx7mev97vsdgmhp73mn6md98etms7adgk540s4xv8k8"
 FILES=(

@@ -1,8 +1,5 @@
 #!/usr/bin/env bats
-# Display tests for statusline-command.sh — gh/stty mocked, happy path only.
-# Run: bats ~/.claude/statusline-command.bats
 
-# resolve the script relative to this test file, so it works both in $HOME and in CI checkouts
 SCRIPT="$BATS_TEST_DIRNAME/statusline-command.sh"
 
 setup_file() {
@@ -16,7 +13,6 @@ setup_file() {
   git -C "$FAKE_REPO" -c user.email=t@e -c user.name=t -c commit.gpgsign=false \
     commit -q --allow-empty -m x
 
-  # fake gh: fails outside a git repo (like the real one), canned JSON inside
   cat > "$FAKE_BIN/gh" <<'EOF'
 #!/bin/bash
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 1
@@ -37,7 +33,6 @@ JSON
 esac
 EOF
 
-  # fake stty: terminal width injected via FAKE_COLS
   printf '#!/bin/bash\necho "50 $FAKE_COLS"\n' > "$FAKE_BIN/stty"
   chmod +x "$FAKE_BIN/gh" "$FAKE_BIN/stty"
 }
@@ -46,14 +41,12 @@ teardown_file() {
   rm -f "${TMPDIR:-/tmp}/cc-prci-${SID_PREFIX}"*
 }
 
-# ---- helpers ----
-
-make_input() { # $1 = session_id, $2 = current_dir
+make_input() {
   printf '{"session_id":"%s","workspace":{"current_dir":"%s"},"context_window":{"total_input_tokens":50000,"context_window_size":200000,"used_percentage":25},"rate_limits":{"five_hour":{"used_percentage":34,"resets_at":%s},"seven_day":{"used_percentage":62,"resets_at":%s}},"cost":{"total_cost_usd":1.23},"model":{"display_name":"Fable 5"},"effort":{"level":"high"}}' \
     "$1" "$2" "$(( $(date +%s) + 13260 ))" "$(( $(date +%s) + 316800 ))"
 }
 
-render() { # $1 = width, $2 = session_id, $3 = current_dir
+render() {
   make_input "$2" "$3" \
     | FAKE_COLS=$1 COLUMNS=$1 PATH="$FAKE_BIN:$PATH" bash "$SCRIPT"
 }
@@ -62,7 +55,7 @@ strip_esc() { sed $'s/\x1b]8;;[^\x07]*\x07//g; s/\x1b\\[[0-9;]*m//g'; }
 
 vlen() { printf '%s' "$1" | strip_esc | LC_ALL=en_US.UTF-8 wc -m | tr -d ' '; }
 
-wait_cache() { # $1 = session_id; waits until the cache file exists ($2=size: non-empty)
+wait_cache() {
   local f="${TMPDIR:-/tmp}/cc-prci-$1" i
   for i in $(seq 1 25); do
     if [ "${2:-}" = "size" ]; then [ -s "$f" ] && return 0; else [ -e "$f" ] && return 0; fi
@@ -77,8 +70,6 @@ assert_contains() {
   echo "missing '$2' in: $(printf '%s' "$1" | strip_esc)"
   return 1
 }
-
-# ---- tests ----
 
 @test "basic_render_wide: 幅200で1行に全セグメントが並ぶ" {
   run render 200 "${SID_PREFIX}-basic" "$PLAIN_DIR"
@@ -106,9 +97,9 @@ assert_contains() {
 
 @test "pr_and_ci_display: PRリンクとCI状態別カウントが表示される" {
   local sid="${SID_PREFIX}-prci"
-  render 200 "$sid" "$FAKE_REPO" >/dev/null   # 1回目: バックグラウンドフェッチを起動
+  render 200 "$sid" "$FAKE_REPO" >/dev/null
   wait_cache "$sid" size
-  run render 200 "$sid" "$FAKE_REPO"          # 2回目: キャッシュから表示
+  run render 200 "$sid" "$FAKE_REPO"
   [ "$status" -eq 0 ]
   assert_contains "$output" "#123"
   assert_contains "$output" "CI"
@@ -117,14 +108,13 @@ assert_contains() {
   assert_contains "$output" "○1"
   assert_contains "$output" "●1"
   assert_contains "$output" "⊘1"
-  # 旧コミット(sha=bbb)の run が混ざっていないこと
   [[ "$output" != *"✓3"* ]]
 }
 
 @test "no_repo_no_ci: repo外ではPR/CIセグメントが出ない" {
   local sid="${SID_PREFIX}-norepo"
   render 200 "$sid" "$PLAIN_DIR" >/dev/null
-  wait_cache "$sid"                            # repo外はキャッシュが空のまま作られる
+  wait_cache "$sid"
   run render 200 "$sid" "$PLAIN_DIR"
   [ "$status" -eq 0 ]
   [[ "$output" != *"CI"* ]]

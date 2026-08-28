@@ -11,19 +11,12 @@ show_agent_labels_on_pane_borders = true
 
 agent_panel_sort = "spaces"
 [terminal]
-# roppoh の dev-pod(Linux)で load-bearing。既定の "auto" は macOS だけログインシェルに
-# なり、Linux では非ログインシェルになる。dev-pod は /etc/zsh/zprofile でしか
-# ~/.nix-profile/bin を PATH に足していないため、非ログインだとペイン内で mise / docker /
-# kubectl / sops がどれも解決しない。macOS では "auto" と等価なので無挙動。
 shell_mode = "login"
 
 [experimental]
 pane_history = true
 switch_ascii_input_source_in_prefix = true
 
-# Agent パネルに Claude Code のセッション名(/rename の値)を表示する。
-# Claude Code は OSC 2 でセッション名をタイトルに出しており、
-# terminal_title_stripped はスピナー記号を除いた値。
 [ui.sidebar.agents.rows_by_agent]
 claude = [
   ["state_icon", "workspace", "tab"],
