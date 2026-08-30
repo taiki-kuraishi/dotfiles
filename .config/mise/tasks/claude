@@ -2,4 +2,4 @@
 #MISE description="Run claude skipping permissions"
 #MISE dir="{{cwd}}"
 set -euo pipefail
-exec claude --allow-dangerously-skip-permissions "$@"
+exec claude --allow-dangerously-skip-permissions --mcp-config "$HOME/.config/mcp/mcp.json" "$@"
