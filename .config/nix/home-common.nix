@@ -21,6 +21,7 @@
       jq
       jaq
       less
+      glow
       ripgrep
       fd
       fzf
