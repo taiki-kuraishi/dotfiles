@@ -16,6 +16,7 @@ shell_mode = "login"
 [experimental]
 pane_history = true
 switch_ascii_input_source_in_prefix = true
+kitty_graphics = true
 
 [ui.sidebar.agents.rows_by_agent]
 claude = [
