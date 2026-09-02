@@ -3,7 +3,7 @@
     "deny": [],
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "claude-fable-5-1[1m]",
   "hooks": {},
   "statusLine": {
     "type": "command",
@@ -32,10 +32,14 @@
       }
     }
   },
+  "outputStyle": "Concise",
   "language": "日本語",
   "effortLevel": "xhigh",
   "modelSettings": {
-    "claude-sonnet-5": {
+    "claude-opus-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-fable-5": {
       "effortLevel": "xhigh"
     }
   },
@@ -47,7 +51,6 @@
   "skipWorkflowUsageWarning": true,
   "theme": "dark",
   "editorMode": "normal",
-  "outputStyle": "Concise",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell",
   "autoCompactEnabled": true,
