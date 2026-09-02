@@ -1,6 +1,6 @@
 ---
 name: herdr-worktree-handoff
-description: Use when the user asks to hand a task off to another Claude Code agent in its own git worktree that they can watch from Herdr — "別 worktree に切り出して", "herdr で動かして", "spawn a worktree agent", "delegate this to a new session in herdr". Also use when `herdr agent start` returns agent_not_ready, or `herdr agent prompt --wait` comes back blocked.
+description: Use when the user asks to hand a task off to another Claude Code agent in its own git worktree that they can watch from Herdr — "別 worktree に切り出して", "herdr で動かして", "spawn a worktree agent", "delegate this to a new session in herdr". Also use when `herdr agent start` returns agent_not_ready, or `herdr agent prompt --wait` comes back blocked. Also use when the delegated work is done and the user wants the Herdr workspace, worktree, and branch removed (「片付けて」「消して」, "clean up the worktree").
 ---
 
 # Handing a task off to a Herdr worktree agent
@@ -81,10 +81,18 @@ immediately. `agent read` first, then wait again.
 ## Reporting and cleanup
 
 Report branch, worktree path, workspace id, agent name, and the worker's
-final message. Leave the workspace open — the user wants to inspect it. When
-they say it is done:
+final message. Leave the workspace open — the user wants to inspect it.
+
+When they say it is done, remove all three, in this order:
 
 ```bash
-herdr workspace close <workspace_id>
-wt -C <repo> remove <branch>      # --force only when uncommitted changes are meant to be dropped
+herdr workspace list                    # label == branch → workspace_id
+herdr workspace close <workspace_id>    # first: this also ends the worker's claude
+wt -C <repo> remove <branch> --foreground   # removes the worktree; deletes the branch too when it is merged
+#   -D  branch is unmerged and the user said to drop it
+#   -f  worktree has uncommitted changes and the user said to drop them
+git -C <repo> worktree list && git -C <repo> branch    # confirm both are gone
 ```
+
+`-D` and `-f` are irreversible. Add them only when the user said the branch
+or the changes can go; otherwise stop at the `wt remove` error and ask.
