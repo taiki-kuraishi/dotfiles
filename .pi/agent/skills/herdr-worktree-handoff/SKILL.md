@@ -27,8 +27,8 @@ wt -C <repo> switch --create <branch> --no-cd --format json
 # 2. workspace on that path, without stealing the user's focus
 herdr workspace create --cwd <path> --label <branch> --no-focus   # → .result.root_pane.pane_id
 
-# 3. claude in that pane; everything after -- goes to claude
-herdr agent start <branch> --kind claude --pane <pane_id> --timeout 60000 -- --permission-mode acceptEdits -n <branch>
+# 3. claude in that pane; everything after -- goes to claude (add --model here to override)
+herdr agent start <branch> --kind claude --pane <pane_id> --timeout 60000 -- --permission-mode auto -n <branch>
 
 # 4. clear the trust dialog (below), then hand over the task
 herdr agent prompt <branch> "<task>" --wait --timeout 600000       # returns on idle | done | blocked
@@ -71,7 +71,9 @@ you have not read — when `agent start` returns `idle`, the same keystrokes
 land in the worker's input box.
 
 **`agent prompt --wait` → `blocked`.** The worker hit a tool permission
-prompt (acceptEdits does not cover Bash). `agent read` the pane and tell the
+prompt. Expect more of these on a machine where auto mode is unavailable
+(org policy `disableAutoMode`, plan, or model): claude then falls back to
+default mode and asks for every tool. `agent read` the pane and tell the
 user what it is waiting for; they answer it from the Herdr sidebar. Do not
 answer permission prompts on the worker's behalf.
 
