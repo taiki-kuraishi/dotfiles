@@ -83,6 +83,8 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 3. spec は `<wt>/docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`。
    合意した節（目的 / スコープ外 / 要件 / 設計 / エラー処理 / テスト方針）を順に追記する。
    未合意の節は書かない。placeholder も書かない。
+   **節の案は chat 本文に書かない。** chat の長文は `summarized` で省略されて user が読めない。
+   `AskUserQuestion` の option `preview` に本文ごと入れて提示し、OK が出た本文をそのまま spec に書く。
 4. 全節が埋まったら spec self-review、user に確認して R2 へ。
 
 ### R2. writing-plans
@@ -100,6 +102,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 - 1 wave = 1 PR。各 wave が単独で CI 緑になる境界で切る。切れないなら理由を plan に書く。
 - wave ごとに task 一覧（名前・Files・Depends on）を user に提示し、合意した wave から書く。
+  一覧も chat 本文ではなく `AskUserQuestion` の `preview` に入れる（R1 と同じ理由）。
 - plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を、
   もう 1 体に **repo docs 整合**（CLAUDE.md、`.claude/rules/**`、README、`docs/**`）を見せる。
   ずれは user と相談して plan か docs のどちらを直すか決める。
