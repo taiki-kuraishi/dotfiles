@@ -1,6 +1,6 @@
 ---
 name: bw-cli
-description: Use when reading a secret out of the Bitwarden vault on this machine with the bw CLI — an SSH key, password, token, or note, especially when it has to land on disk. Also use when bw reports the vault is locked, or an interactive bw command dies with "ERR_USE_AFTER_CLOSE: readline was closed".
+description: 'Use when reading a secret out of the Bitwarden vault on this machine with the bw CLI — an SSH key, password, token, or note, especially when it has to land on disk. Also use when bw reports the vault is locked, or an interactive bw command dies with "ERR_USE_AFTER_CLOSE: readline was closed".'
 ---
 
 # bw (Bitwarden CLI)
