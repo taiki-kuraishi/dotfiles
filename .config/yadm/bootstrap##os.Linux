@@ -28,6 +28,7 @@ if [ ! -x "$HOME/.local/bin/claude" ]; then
 fi
 
 mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
+mise x -- bunx skills add stablyai/orca --skill orca-cli --skill computer-use --skill orchestration -g -y --agent claude-code
 
 if ! command -v dockerd >/dev/null 2>&1 \
   && [ -d /run/systemd/system ] \
