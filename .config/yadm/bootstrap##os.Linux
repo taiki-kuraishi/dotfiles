@@ -30,22 +30,12 @@ fi
 mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
 mise x -- bunx skills add stablyai/orca --skill orca-cli --skill computer-use --skill orchestration -g -y --agent claude-code
 
-if ! command -v orca-ide >/dev/null 2>&1 \
-  && command -v apt-get >/dev/null 2>&1 \
-  && sudo -n true 2>/dev/null; then
-  case "$sys" in
-    x86_64-linux) orca_arch=amd64 ;;
-    aarch64-linux) orca_arch=arm64 ;;
-  esac
-  orca_dir=$(mktemp -d)
-  curl -fsSL -o "$orca_dir/orca-ide.deb" "$(
-    curl -fsSL https://api.github.com/repos/stablyai/orca/releases/latest \
-      | jaq -r --arg a "$orca_arch" \
-        '.assets[] | select(.name | endswith("_" + $a + ".deb")) | .browser_download_url'
-  )"
-  sudo apt-get install -y "$orca_dir/orca-ide.deb"
-  rm -rf "$orca_dir"
-  echo "Installed orca-ide. Pair with: orca-ide serve --port 6768 --pairing-address <this-host-ip>" >&2
+if ! command -v orca-ide >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+  curl -fsSL -o /tmp/orca-ide.deb "$(curl -fsSL https://api.github.com/repos/stablyai/orca/releases/latest \
+    | jaq -r --arg a "$(dpkg --print-architecture)" \
+      '.assets[] | select(.name | endswith("_" + $a + ".deb")) | .browser_download_url')"
+  sudo apt-get install -y /tmp/orca-ide.deb
+  rm -f /tmp/orca-ide.deb
 fi
 
 if ! command -v dockerd >/dev/null 2>&1 \
