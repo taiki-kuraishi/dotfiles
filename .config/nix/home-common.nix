@@ -51,6 +51,7 @@
     ++ [
       "${config.home.homeDirectory}/.local/bin"
       "${config.home.homeDirectory}/.bun/bin"
+      "${config.home.homeDirectory}/.nix-profile/bin"
     ]
     ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
 
