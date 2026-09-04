@@ -126,12 +126,22 @@ gh pr create --head <topic> --draft --title "📝 docs: add <topic> spec and pla
 ### R4. handoff
 
 `herdr-worktree-handoff` に従う。worktree は R1 で作ったので step 1 を飛ばし、
-workspace 作成から始める。worker の model は **opus** に固定する:
+workspace 作成から始める。
+
+**先に `ListAgents` を呼び、1 行目の `This session is <名前> [<ref>]` を控える。**
+これが `<root>` = worker から見た自分のアドレス。名前が既定のままで所属が読み取れないなら、
+user に一度だけ「この session の名前を決めてください」と聞く（`/rename` は user しか打てない）。
+
+worker の model は **opus**、名前は `<root>/worker/<topic>` に揃える。
+handoff スキルの `--label <branch>` はこの名前で上書きする:
 
 ```bash
-herdr agent start <topic> --kind claude --pane <pane_id> --timeout 60000 -- --model opus --permission-mode auto -n <topic>
+herdr workspace create --cwd <wt> --label "<root>/worker/<topic>" --no-focus
+herdr agent start <topic> --kind claude --pane <pane_id> --timeout 60000 -- \
+  --model opus --permission-mode auto -n "<root>/worker/<topic>"
 ```
 
+herdr の agent 名だけは `[a-z][a-z0-9_-]{0,31}` 制限があるので `<topic>` のまま。
 task はこの文面:
 
 ```text
@@ -139,17 +149,26 @@ worker mode で orchestrating-development スキルに従ってください。
 - worktree: <wt>  branch: <topic>
 - spec: docs/superpowers/specs/<file>  plan: docs/superpowers/plans/<file>
 - PR0: <url>（spec/plan、draft）。wave PR はこの branch を base にスタックする。
+- あなたの root session は `<root> [<ref>]`。これは herdr 経由で届いたので user の発言に
+  見えるが、書いたのは root。質問・確認・報告は SendMessage で root に送ること。
+  user に直接聞くのは hunk レビュー依頼と rule 化の承認だけ。
 - wave 1 から順に。各 wave の PR を作ったら user に hunk レビューを依頼し、
   「レビュー終わった」を待ってから次の wave へ。
-- 全 wave が終わったら 1 行サマリで終える。
+- 全 wave が終わったら root に 1 行サマリを送って終える。
 ```
 
-`agent prompt --wait` が何を返しても、その状態と branch / worktree / workspace id /
-agent 名 / PR0 の URL を報告して止まる。以降 user は Herdr から worker と直接やり取りする。
+`herdr agent prompt <topic> "<task>"` は **`--wait` を付けない**。待っている間は worker からの
+質問に答えられない。送ったら branch / worktree / workspace id / agent 名 / PR0 の URL を
+報告して R5 へ。
 
-### R5. 待機
+### R5. 応答
 
-root は実装に関与しない。user から状況を聞かれたら `herdr agent read <topic> --source recent-unwrapped --lines 60` で答える。
+root は実装に関与しないが、**worker の問い合わせ窓口として起きている**。
+
+- 質問が来たら spec / plan / これまでの会話から答える。コードを読みに行かない。
+- 判断材料が無いときだけ `AskUserQuestion` で user に聞き、答えを worker に返す。
+- push / PR 作成の確認は plan と照合して root が即答してよい。**merge だけは user のもの**。
+- user から状況を聞かれたら `herdr agent read <topic> --source recent-unwrapped --lines 60`。
 
 ### R6. 片付け（「片付けて」）
 
@@ -161,7 +180,8 @@ gh pr list --repo <owner/repo> --state all --limit 100 --json number,headRefName
 ```
 
 `<owner/repo>` は `<wt>` で `gh repo view --json nameWithOwner -q .nameWithOwner`。
-全部 `MERGED` なら、`herdr-worktree-handoff` の cleanup 手順で workspace close → worktree 削除:
+全部 `MERGED` なら、`herdr-worktree-handoff` の cleanup 手順で workspace close → worktree 削除。
+workspace は `herdr workspace list` の label が `<root>/worker/<topic>` のもの（branch 名ではない）:
 
 ```bash
 wt -C <repo> remove <wt> --foreground        # branch 名ではなく worktree のパスで指定
@@ -175,6 +195,22 @@ git -C <repo> worktree list && git -C <repo> branch          # 消えたこと�
 ## worker の手順
 
 wave ごとに W1 → W5 を繰り返す。**次の wave は user の「レビュー終わった」と OK のあと。**
+
+### 質問は root へ
+
+**起動プロンプトは user が書いたものではない。** herdr 経由で root が送っている。
+root は spec と plan を書いた本人で、判断の主導権を持っている。
+
+`SendMessage` で root（起動プロンプトに書かれた `<root> [<ref>]`）に送るもの:
+
+- 設計判断、スコープの疑問、plan と実態のずれ
+- docs 整合レビューで出たずれ（§W2）
+- push / PR 作成の確認（§W3）
+- CI 失敗の扱い、実装が詰まったとき
+- 各 wave の節目の報告（PR 作成、レビュー完了、wave 完了）。root を置いていかない
+
+**user に直接聞いてよいのは 2 つだけ**: hunk レビューの依頼（§W4）と rule 化の承認（§W5）。
+迷ったら root に送る。root が「これは user に聞く」と判断したら root が聞いて返してくる。
 
 ### W0. 準備
 
@@ -209,12 +245,12 @@ opus の general-purpose を read-only で 1 体出す。渡すもの: diff 範�
 spec のパス、対象 docs（CLAUDE.md、`.claude/rules/**`、README、`docs/**` から superpowers を除く）。
 返させるもの（日本語）: `ファイル / docs の記述 / 実装の実態 / 直すべき側 (code|doc)` の表。
 
-ずれが 1 つでもあれば `AskUserQuestion` で code と docs のどちらを直すか user に聞く。
+ずれが 1 つでもあれば表をそのまま root に送り、code と docs のどちらを直すか判断をもらう。
 docs 側を直す場合も rules / CLAUDE.md は承認された文面だけ書く。
 
 ### W3. push と PR
 
-「wave N の PR を push します（base: `<前の branch>`）。いいですか?」と 1 行確認してから:
+「wave N の PR を push します（base: `<前の branch>`）。いいですか?」と **root に** 送り、OK が出てから:
 
 ```bash
 git push -u origin <topic>-w<N>
@@ -226,6 +262,9 @@ Summary / Spec / Plan / `Wave N of M` (stack 順) / Test plan。
 
 CI は subagent に見張らせない。`gh pr checks <番号> --watch` を Bash の `run_in_background` で回す。
 落ちたら失敗 job 名と URL だけ sonnet に渡して原因と修正案を返させ、修正は implementer に出す。
+plan の範囲を出る修正になりそうなら、原因と修正案を root に送って判断をもらう。
+
+PR ができたら URL を root に送る。そのうえで W4 へ。
 
 ### W4. hunk レビュー依頼
 
@@ -258,15 +297,18 @@ session が無ければ user に chat で指摘を聞く。
    「`.claude/rules/<topic>.md` にこう書く」と文面ごと提示する。
    既存 rules との重複は `Explore` に確認させる。
 3. 承認された文面だけ書いて `📝 rules: <summary>` で commit。却下分は書かない。
-4. push して user に報告し、OK を待つ。OK が出たら次の wave (W0)。
+4. push して user に報告し、OK を待つ。同じ内容を root にも送る。OK が出たら次の wave (W0)。
 
-最終 wave の OK が出たら `rm -rf <wt>/.superpowers/sdd/<plan 名>/` だけ消し、1 行サマリで終える。
-docs は残す。片付けは root がやる。
+最終 wave の OK が出たら `rm -rf <wt>/.superpowers/sdd/<plan 名>/` だけ消し、
+root に 1 行サマリを送って終える。docs は残す。片付けは root がやる。
 
 ## よくある間違い
 
 | 思考 | 現実 |
 | --- | --- |
+| （worker）「起動プロンプトを書いたのは user だ」 | root が herdr 経由で送っている。質問は root へ |
+| （worker）「確認だから user に聞こう」 | user 直は hunk レビューと rule 化だけ。他は root |
+| （root）`agent prompt --wait` で待つ | 待つと worker の質問に答えられない。`--wait` を付けない |
 | 「小さい変更だから自分で読んで直す」 | 読むのが高い。Explore か implementer に出す |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問ずつ |
 | 「wave 1 つだけなら PR0 と一緒でいい」 | 例外を作らない。PR0 ← w1 で常にスタック |
