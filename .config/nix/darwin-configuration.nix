@@ -29,6 +29,8 @@
     enable = true;
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
+    # sketchybar's makefile races between `clean` and `universal` under parallel make
+    extraEnv.HOMEBREW_MAKE_JOBS = "1";
     taps = [
       {
         name = "abue-ammar/tinycast";
