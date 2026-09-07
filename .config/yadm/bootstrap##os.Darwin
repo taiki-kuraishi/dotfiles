@@ -21,6 +21,10 @@ if command -v mise >/dev/null 2>&1; then
   fi
 fi
 
+if [ ! -x "$HOME/.local/bin/pi" ] && command -v mise >/dev/null 2>&1; then
+  mise x -- npm install -g --prefix "$HOME/.local" --ignore-scripts @earendil-works/pi-coding-agent
+fi
+
 if command -v bunx >/dev/null 2>&1; then
   bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
   bunx skills add stablyai/orca --skill orca-cli --skill computer-use --skill orchestration -g -y --agent claude-code

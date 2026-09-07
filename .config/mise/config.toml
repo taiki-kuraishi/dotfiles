@@ -11,7 +11,6 @@ bats = "latest"
 "npm:typescript" = "latest"
 "npm:yaml-language-server" = "latest"
 
-"npm:@earendil-works/pi-coding-agent" = "latest"
 "cargo:shpool" = "latest"
 rust = "latest"
 
