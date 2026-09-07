@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "0.85.1",
   "theme": "dark",
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-fable-5",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "muse-spark-1.3-contributor",
   "defaultThinkingLevel": "max",
   "packages": [
     "npm:@hypabolic/pi-hypa",
@@ -11,14 +11,76 @@
     "npm:pi-subagents",
     "npm:@juicesharp/rpiv-todo",
     "git:github.com/DietrichGebert/ponytail",
-    "npm:@upstash/context7-pi"
+    "npm:@upstash/context7-pi",
+    "npm:pi-free",
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:pi-background-tasks",
+    "npm:@narumitw/pi-goal",
+    "npm:@narumitw/pi-usage",
+    "npm:pi-intercom"
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "collapseChangelog": true,
   "outputPad": 0,
-  "httpIdleTimeoutMs": 60000,
+  "httpIdleTimeoutMs": 300000,
   "warnings": {
     "anthropicExtraUsage": false
+  },
+  "images": {
+    "blockImages": false
+  },
+  "steeringMode": "all",
+  "enableInstallTelemetry": false,
+  "defaultProjectTrust": "always",
+  "tuiMode": "fullscreen",
+  "followUpMode": "all",
+  "transport": "auto",
+  "subagents": {
+    "agentOverrides": {
+      "claude-code": {
+        "disabled": true
+      },
+      "claude-code-writer": {
+        "disabled": true
+      },
+      "codex-exec": {
+        "disabled": true
+      },
+      "codex-exec-writer": {
+        "disabled": true
+      },
+      "cursor-agent": {
+        "disabled": true
+      },
+      "cursor-agent-writer": {
+        "disabled": true
+      },
+      "delegate": {
+        "disabled": true
+      },
+      "doc-drift": {
+        "disabled": true
+      },
+      "oracle": {
+        "disabled": true
+      },
+      "scout": {
+        "model": "opencode-go/deepseek-v4-flash",
+        "thinking": "low"
+      },
+      "researcher": {
+        "model": "opencode-go/deepseek-v4-flash",
+        "thinking": "max"
+      },
+      "worker": {
+        "model": "opencode-go/deepseek-v4-flash",
+        "thinking": "high"
+      },
+      "reviewer": {
+        "model": "opencode-go/muse-spark-1.3-contributor",
+        "thinking": "xhigh"
+      }
+    }
   }
 }
