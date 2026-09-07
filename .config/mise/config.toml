@@ -4,7 +4,6 @@ node = "latest"
 pnpm = "latest"
 uv = "latest"
 go = "latest"
-java = "latest"
 deno = "latest"
 bats = "latest"
 
