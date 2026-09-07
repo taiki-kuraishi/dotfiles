@@ -1,6 +1,6 @@
 ---
 name: orchestrating-development
-description: Use when the user asks to build, implement, refactor, or fix something in a git repo that needs a spec and plan before code — 「〜を実装して」「〜機能を作りたい」「issue #N をやって」「リファクタして」, "build X", "implement this". Also use when a session was started as a worker for a plan (「worker mode で」), when the user reports a hunk review is done (「レビュー終わった」), or asks to clean up a finished handoff (「片付けて」). Not for questions, spikes, or one-line fixes with no plan.
+description: Use when the user asks to build, implement, refactor, or fix something in a git repo that needs a spec and plan before code — 「〜を実装して」「〜機能を作りたい」「issue #N をやって」「リファクタして」, "build X", "implement this". Also use when a session was started as a worker for a plan (「worker mode で」), when the user reports a hunk review is done (「レビュー終わった」), or asks to clean up a finished handoff (「片付けて」). Not for questions, spikes, or one-line fixes with no plan. Works in both Claude Code and pi sessions; tool names that differ between the two map per the correspondence table below (`ClaudeではX / piではY` の読み替えで両対応).
 ---
 
 # Orchestrating development
@@ -8,6 +8,8 @@ description: Use when the user asks to build, implement, refactor, or fix someth
 superpowers (brainstorming → writing-plans → subagent-driven-development) を土台に、
 **spec / plan を root session が書き、実装は herdr の worker session に委譲し、
 user は hunk で PR をレビューする**流れに固定する。
+
+Claude Code と pi の両方で使う。本文の手順は Claude Code を主文とし、pi では下の対応表・各節の注記（`ClaudeではX / piではY`）に従って読み替える。pi 等価物が未確定の箇所は「要確認」と書いた。
 
 superpowers 本文と矛盾する箇所は**このスキルが優先**する
 (`superpowers:using-superpowers` の "User instructions take precedence over skills" に依拠)。
@@ -23,39 +25,54 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 ## 共通ポリシー
 
-> 注意：あなたの主なタスクは分析、編排、検証です。具体的なタスクは可能な限り subagent（Opus または Sonnet）に
+> 注意：あなたの主なタスクは分析、編排、検証です。具体的なタスクは可能な限り subagent（Opus または Sonnet。pi では対応表に従い `scout` / `researcher` / `worker` / `reviewer` など）に
 > 実行させます。自分は要件の明確化、方案の分解、タスクの分配、結果の受け入れだけを行い、実装類の作業
 > （大量のコード読み込み、コード執筆、テスト実行、批量修正）はすべて Agent ツールを使って subagent に
 > 割り当てて実行させます。
 
 **オーケストレータはコードを読まない・書かない。** 高いのは読むことであって書くことではない。
 
-- 自分で読んでよいもの: spec、plan、subagent の報告、hunk のコメント、`.github/pull_request_template.md`、`.claude/rules/**` の見出し。
-- 自分で書いてよいもの: spec、plan、commit / PR のタイトルと本文、`.claude/rules/**`（user 承認後）。
+- 自分で読んでよいもの: spec、plan、subagent の報告、hunk のコメント、`.github/pull_request_template.md`、`.claude/rules/**`（pi では `~/.pi/agent/` 配下の rules）の見出し。
+- 自分で書いてよいもの: spec、plan、commit / PR のタイトルと本文、`.claude/rules/**`（pi では `~/.pi/agent/` 配下の rules。いずれも user 承認後）。
 - それ以外の読み書き・検証・デバッグはすべて subagent に出す。迷ったら出す。
 
-| 工程 | 委譲先 (`subagent_type` + prompt) | model |
+| 工程 | 委譲先（Claude / pi） | model（Claude / pi） |
 | --- | --- | --- |
-| コードベース探索・ライブラリ調査 | `Explore` | sonnet |
-| plan の task 実装 | `general-purpose` + `<sp>/subagent-driven-development/implementer-prompt.md` | sonnet |
-| デバッグ・検証・CI 失敗ログの調査 | `general-purpose` | sonnet |
-| task review | `general-purpose` + `<sp>/subagent-driven-development/task-reviewer-prompt.md` | **opus** |
-| wave の最終 code review | `general-purpose` + `<sp>/requesting-code-review/code-reviewer.md` | **opus** |
-| plan review | `general-purpose` + `<sp>/writing-plans/plan-document-reviewer-prompt.md` | **opus** |
-| docs 整合レビュー（§R6） | `general-purpose` | **opus** |
-| ponytail レビュー（§R6） | `general-purpose` + Skill `ponytail:ponytail-review` | **opus** |
+| コードベース探索・ライブラリ調査 | `Explore` / `scout`（コード偵察）・`researcher`（Web 調査） | sonnet / session 継承 |
+| plan の task 実装 | `general-purpose` + implementer プロンプト / `worker` | sonnet / session 継承 |
+| デバッグ・検証・CI 失敗ログの調査 | `general-purpose` / `worker` | sonnet / session 継承 |
+| task review | `general-purpose` + task-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / session 継承 |
+| wave の最終 code review | `general-purpose` + code-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / session 継承 |
+| plan review | `general-purpose` + plan-document-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / session 継承 |
+| docs 整合レビュー（§R6） | `general-purpose`（read-only） / `reviewer`（read-only） | **opus** / session 継承 |
+| ponytail レビュー（§R6） | `general-purpose` + Skill `ponytail:ponytail-review` / `reviewer` + 同 Skill（pi での有無は要確認。無ければ省略） | **opus** / session 継承 |
+
+対応表（Claude ⇔ pi。pi の model 継承は provider opencode-go 前提。明示モデル名は要確認）:
+
+| 項目 | Claude | pi | 備考 |
+| --- | --- | --- |
+| 探索・偵察 | `Explore` | `scout` | |
+| 汎用実行・実装 | `general-purpose` | `worker` | |
+| Web 調査 | `general-purpose` に含む | `researcher` に分離 | pi のみ分離 |
+| review 系 | `general-purpose` | `reviewer` | review 4 工程とも |
+| 軽量 / 重量モデル | sonnet / opus | session 継承 | pi の明示モデル名は未確定 |
+| user への質問 | `AskUserQuestion` | 質問ツール | multiSelect 相当の有無は要確認 |
+| session 一覧 | `ListAgents` | 要確認（`subagent` list 系または intercom の session 名機構） | 未確定 |
+| worker→root 報告 | `SendMessage` | `herdr agent prompt <root名>` | pi での報告経路は要確認 |
+| superpowers 本体 | `<sp>` = `~/.claude/plugins/...` | pi skill 名・パスは要確認（候補: superpowers 6.3.0 の `.pi/extensions` 同梱） | 未確定 |
+| rules | `.claude/rules/**`・`CLAUDE.md` | `~/.pi/agent/` 配下・`AGENTS.md` | |
 
 `<sp>` = `~/.claude/plugins/cache/claude-plugins-official/superpowers/<version>/skills`
-（`ls` で version を確認）。SDD の `scripts/sdd-workspace` / `task-brief` / `review-package` も同じ場所。
-`Agent` の `model` は毎回明示する。session の model を継承させない。
+（`ls` で version を確認。以上 Claude）。pi では superpowers 6.3.0 に `.pi/extensions` が同梱されているため、同等の pi skill 名とパス解決を先に確定させる（要確認）。SDD の `scripts/sdd-workspace` / `task-brief` / `review-package` 参照も環境ごとに対応表に従う。
+`Agent` の `model` は毎回明示する。session の model を継承させない（以上 Claude）。pi では逆に session の model を継承する（provider は opencode-go）。明示名が必要になったら opencode-go のモデル名に置換する（要確認）。
 
 **言語**: spec、plan、user への質問、hunk の agent note は**日本語**。commit と PR は
 **English + gitmoji** (`<emoji> <scope>: <summary>`、imperative)。
 
-**質問**: `AskUserQuestion` で 1 メッセージ 1 問。選択肢を用意し、決まったことだけを文書に書く。
+**質問**: `AskUserQuestion`（pi では質問ツールに読み替える）で 1 メッセージ 1 問。選択肢を用意し、決まったことだけを文書に書く。multiSelect 相当の有無は要確認。
 
 **消さない**: `docs/superpowers/specs/**` と `docs/superpowers/plans/**` は成果物として残す。
-`.claude/rules/**` と `CLAUDE.md` は user の承認なしに変更しない。
+`~/.pi/agent/` 配下の rules と `AGENTS.md` は user の承認なしに変更しない（Claude では `.claude/rules/**` と `CLAUDE.md`）。
 
 ## superpowers の上書き
 
@@ -65,7 +82,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | brainstorming: 設計をまとめて提示 | 1 問ずつ聞き、合意した節から spec に追記 |
 | writing-plans: task を直列に並べる | `Depends on:` と `## Waves` を書く。1 wave = 1 PR |
 | writing-plans: 全 task を一度に書く | wave ごとに task 一覧を提示し、合意分だけ書く |
-| writing-plans: self-review は自分で | 自分でやった上で、opus の plan reviewer も出す（§R2） |
+| writing-plans: self-review は自分で | 自分でやった上で、opus の plan reviewer（pi では reviewer）にも出す（§R2） |
 | subagent-driven-development: plan 全体で 1 回実行 | **wave ごとに実行**。todo と pre-flight scan は当該 wave の task だけ |
 | subagent-driven-development: 並列ディスパッチ禁止 | 同 wave 内は条件付きで並列（§W1） |
 | subagent-driven-development: 最終 review → workspace 削除 → finishing-a-development-branch | worker は最終 review をやらない（root が §R6 で）。finishing-a-development-branch は呼ばない。`.superpowers/sdd/` は消さず ledger の Ruling を DONE 報告に転記。docs は残す |
@@ -76,7 +93,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 ### R1. brainstorming
 
-`superpowers:brainstorming` を起動し、**architectural path** で上の上書き通りに運用する。調査は `Explore` に出す。
+`superpowers:brainstorming` を起動し、**architectural path** で上の上書き通りに運用する。調査は `Explore`（pi では `scout`＝コード / `researcher`＝Web）に分けて出す。
 
 1. 最初の数問で topic と branch 名 `<topic>` を決める（`[a-z][a-z0-9_-]` で 28 文字以内。
    herdr の agent 名 `<topic>-w<N>` が 32 文字制限）。
@@ -94,7 +111,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 ### R2. writing-plans
 
-`superpowers:writing-plans` を起動し、plan を `<wt>/docs/superpowers/plans/YYYY-MM-DD-<topic>.md` に書く。
+`superpowers:writing-plans` を起動し、plan を `<wt>/docs/superpowers/plans/YYYY-MM-DD-<topic>.md` に書く（pi では等価物・パスは要確認）。
 
 - 各 Task に `Depends on: <task 番号 | none>`。
 - 冒頭に `## Waves` を置く。同一 wave = 相互に依存しない task。
@@ -108,8 +125,8 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 - 1 wave = 1 PR = 1 worker session。各 wave が単独で CI 緑になる境界で切る。切れないなら理由を plan に書く。
   wave 内の task 数に上限は無い（並列に出せる）が、wave をまたぐ作業を 1 つの worker に渡すことはしない。
 - wave ごとに task 一覧（名前・Files・Depends on）を user に提示し、合意した wave から書く。
-- plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を、
-  もう 1 体に **repo docs 整合**（CLAUDE.md、`.claude/rules/**`、README、`docs/**`）を見せる。
+- plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を（pi では reviewer＋同等プロンプト。パスは要確認）、
+  もう 1 体に **repo docs 整合**（CLAUDE.md、`.claude/rules/**`、README、`docs/**`。pi では CLAUDE.md→AGENTS.md、`.claude/rules/**`→`~/.pi/agent/` 配下 rules に読み替え）を見せる。
   ずれは user と相談して plan か docs のどちらを直すか決める。
 
 ### R3. PR0（spec + plan）
@@ -121,7 +138,7 @@ git add docs/superpowers
 git commit -m "📝 docs: add <topic> spec and plan"
 git push -u origin <topic>
 gh pr create --head <topic> --draft --title "📝 docs: add <topic> spec and plan" --body-file <file>
-gh pr checks <番号> --watch          # Bash の run_in_background で。緑になってから次へ
+gh pr checks <番号> --watch          # Bash の run_in_background で（pi での方法は要確認）。緑になってから次へ
 gh pr ready <番号>
 gh pr merge <番号> --squash --delete-branch
 ```
@@ -141,8 +158,10 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
 **wave は stack しない。** wave N の PR を merge してから wave N+1 を main から切る。
 `gh stack` は未 merge の PR を連鎖させる道具で、ここでは使わない。
 
+pi での小規模運用では、user の指示があれば worktree・branch を切らず main 直 push にしてよい。その場合も spec / plan の置き場所と DONE 報告の形式は変えない。
+
 1. **`ListAgents` を呼び、1 行目の `This session is <名前> [<ref>]` を控える。**
-   これが `<root>` = worker から見た自分のアドレス。名前が既定のままで所属が読み取れないなら、
+   これが `<root>` = worker から見た自分のアドレス（pi では等価物要確認：`subagent` の list 系または intercom の session 名機構。確定するまでは起動プロンプトに root 名を直書きして代用）。名前が既定のままで所属が読み取れないなら、
    user に一度だけ「この session の名前を決めてください」と聞く（`/rename` は user しか打てない）。
 2. main を最新にして wave 用の worktree を切る（`wt` の base 既定は default branch）:
 
@@ -151,13 +170,15 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
    wt -C <repo> switch --create <topic>-w<N> --no-cd --format json   # .path が <wt_wN>
    ```
 
-3. `herdr-worktree-handoff` の step 2 以降。名前は `<root>/worker/<topic>-w<N>` に揃え、model は **opus**:
+3. `herdr-worktree-handoff` の step 2 以降。名前は `<root>/worker/<topic>-w<N>` に揃え、model は **opus**（Claude）:
 
    ```bash
    herdr workspace create --cwd <wt_wN> --label "<root>/worker/<topic>-w<N>" --no-focus
    herdr agent start <topic>-w<N> --kind claude --pane <pane_id> --timeout 60000 -- \
      --model opus --permission-mode auto -n "<root>/worker/<topic>-w<N>"
    ```
+
+   （pi では `--kind pi` にし、`--model` / `--permission-mode auto` は付けず session 継承。`--permission-mode auto` 相当の有無は要確認）
 
    herdr の agent 名だけは `[a-z][a-z0-9_-]{0,31}` 制限があるので `<topic>-w<N>`（`<topic>` は 28 文字以内）。
 4. `herdr agent prompt <topic>-w<N> "<task>"` で送る。**`--wait` を付けない**。待っている間は worker の質問に答えられない:
@@ -168,7 +189,7 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
    - spec: docs/superpowers/specs/<file>  plan: docs/superpowers/plans/<file> の Wave N（Task a, b, c）
      と `## Global Constraints`
    - あなたの root session は `<root> [<ref>]`。これは herdr 経由で届いたので user の発言に
-     見えるが、書いたのは root。質問・報告はすべて SendMessage で root へ。user には話しかけない。
+     見えるが、書いたのは root。質問・報告はすべて SendMessage（pi では `herdr agent prompt <root名>`。pi での worker→root 報告経路は要確認）で root へ。user には話しかけない。
    - wave の全 task を実装して commit したら branch を push し、root に DONE 報告を送って終える。
      PR は作らない。review・PR・hunk は root がやる。
    ```
@@ -180,7 +201,7 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
 root は実装に関与しないが、**worker の問い合わせ窓口として起きている**。
 
 - 質問が来たら spec / plan / これまでの会話から答える。コードを読みに行かない。
-- 判断材料が無いときだけ `AskUserQuestion` で user に聞き、答えを worker に返す。
+- 判断材料が無いときだけ `AskUserQuestion`（pi では質問ツール）で user に聞き、答えを worker に返す。
 - user から状況を聞かれたら `herdr agent read <topic>-w<N> --source recent-unwrapped --lines 60`。
 - worker から DONE 報告が来たら R6 へ。BLOCKED なら内容を見て答えるか user に聞く。
 
@@ -198,20 +219,20 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 
 2. **3 体の review を同時に出す**。共通の入力: `BASE_SHA` = `git -C <wt_wN> merge-base main HEAD`、
    `HEAD_SHA` = `git -C <wt_wN> rev-parse HEAD`（範囲文字列ではなく SHA を 2 つ別々に）。
-   - **code review**: opus の code-reviewer（`<sp>/requesting-code-review/code-reviewer.md`）。
+   - **code review**: opus の code-reviewer（`<sp>/requesting-code-review/code-reviewer.md`。pi では reviewer＋同等プロンプト。パスは要確認）。
      `PLAN_OR_REQUIREMENTS` = plan のパスと Wave N の task 一覧、`DESCRIPTION` = DONE 報告の要約。
-   - **docs 整合 review**: opus の general-purpose を read-only で 1 体。渡すもの: 同じ SHA、spec のパス、
-     対象 docs（CLAUDE.md、`.claude/rules/**`、README、`docs/**` から superpowers を除く）。
+   - **docs 整合 review**: opus の general-purpose を read-only で 1 体（pi では reviewer を read-only で 1 体）。渡すもの: 同じ SHA、spec のパス、
+     対象 docs（§R2 と同じ。Claude では CLAUDE.md・`.claude/rules/**`、pi では AGENTS.md・`~/.pi/agent/` 配下 rules。README・`docs/**` は共通。superpowers は除く）。
      返させるもの（日本語）: `ファイル / docs の記述 / 実装の実態 / 直すべき側 (code|doc)` の表。
    - **ponytail review**: opus の general-purpose を 1 体、Skill ツールで `ponytail:ponytail-review` を
-     読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる。
+     読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる（pi での有無は要確認。無ければこの review は省略）。
 
    結果の扱い:
-   - Critical / Important は sonnet の implementer に `<wt_wN>` で直させて commit。再 review は 1 回だけ。
+   - Critical / Important は sonnet の implementer（pi では worker）に `<wt_wN>` で直させて commit。再 review は 1 回だけ。
    - ponytail の `delete / stdlib / native / yagni / shrink` は spec に反しないものだけ implementer に直させる。
      `Lean already` なら何もしない。
    - docs のずれは spec と照らして root が code|doc を決める。決められないときだけ user に聞く。
-     rules / CLAUDE.md を直す場合は user が承認した文面だけ書く。
+     rules（Claude では `.claude/rules/**`、pi では `~/.pi/agent/` 配下）を直す場合は user が承認した文面だけ書く。
 3. **push と draft PR**。確認なしで作る（plan は user 承認済み）:
 
    ```bash
@@ -221,8 +242,8 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 
    本文は自分で書く。`.github/pull_request_template.md` があればその構成。無ければ
    Summary / Spec / Plan / `Wave N of M` / Test plan。
-4. **CI**。subagent に見張らせない。`gh pr checks <番号> --watch` を Bash の `run_in_background` で回す。
-   落ちたら失敗 job 名と URL だけ sonnet に渡して原因と修正案を返させ、修正は implementer に出して push。
+4. **CI**。subagent に見張らせない。`gh pr checks <番号> --watch` を Bash の `run_in_background`（§R3 と同じ。pi での方法は要確認）で回す。
+   落ちたら失敗 job 名と URL だけ sonnet（pi では worker）に渡して原因と修正案を返させ、修正は implementer に出して push。
 5. **hunk レビュー依頼**。user にこの形で。両方のコマンドを必ず添える:
 
    ```text
@@ -236,7 +257,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    pathspec の除外は untracked にも効く。`hunk diff` は TUI なので自分では実行しない。
    agent note を付けるときは `hunk session comment apply --repo <wt_wN> --stdin` でまとめて入れる。
    **summary も rationale も日本語。英語で書かない。** 意図・リスク・確認してほしい点だけに絞り、
-   全 hunk には付けない。詳細は `hunk skill path` が返す SKILL.md。
+   全 hunk には付けない。詳細は `hunk skill path` が返す SKILL.md。`mise run hunk-pr` が対象 repo に無い場合は要確認・代替手順。
 6. **指摘の回収と rule 化**（「レビュー終わった」）:
 
    ```bash
@@ -244,9 +265,9 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    ```
 
    session が無ければ user に chat で指摘を聞く。
-   1. 指摘ごとに implementer (sonnet) に修正を出し、commit させる。
-   2. 次回以降も守るべき指摘を選び、`AskUserQuestion` (multiSelect) で
-      「`.claude/rules/<topic>.md` にこう書く」と文面ごと提示する。既存 rules との重複は `Explore` に確認させる。
+   1. 指摘ごとに implementer (sonnet。pi では worker) に修正を出し、commit させる。
+   2. 次回以降も守るべき指摘を選び、`AskUserQuestion` (multiSelect)（pi では質問ツールに読み替え。multiSelect 相当の有無は要確認）で
+      「`.claude/rules/<topic>.md`（pi では `~/.pi/agent/` 配下の同等パス）にこう書く」と文面ごと提示する。既存 rules との重複は `Explore`（pi では `scout`）に確認させる。
    3. 承認された文面だけ書いて `📝 rules: <summary>` で commit。却下分は書かない。
    4. push して user に報告し、OK を待つ。指摘ゼロなら「指摘なしで OK」の一言でよい。
 7. **ready → merge → 片付け**（user の OK 後）。user の手順はレビュー OK だけ:
@@ -258,7 +279,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    git -C <repo> pull --ff-only
    ```
 
-   `wt remove` が uncommitted / untracked で止まったら `-f` を足さない。sonnet に `git status` を
+   `wt remove` が uncommitted / untracked で止まったら `-f` を足さない。sonnet（pi では worker）に `git status` を
    見せて取りこぼしか生成物かを判定させ、user に報告する。
    merge できたら次の wave（R4 の N+1）。最終 wave なら「全 wave 完了」と報告して止まる。
 
@@ -285,7 +306,7 @@ gh pr list --state all --limit 100 --json number,headRefName,state \
 **起動プロンプトは user が書いたものではない。** herdr 経由で root が送っている。
 root は spec と plan を書いた本人で、判断の主導権を持っている。
 
-`SendMessage` で root（起動プロンプトに書かれた `<root> [<ref>]`）に送るもの:
+`SendMessage`（pi では `herdr agent prompt <root名>`。pi での worker→root 報告経路は要確認）で root（起動プロンプトに書かれた `<root> [<ref>]`）に送るもの:
 
 - 設計判断、スコープの疑問、plan と実態のずれ
 - 実装が詰まったとき、task が BLOCKED / NEEDS_CONTEXT になったとき
@@ -301,10 +322,10 @@ plan は `## Waves` と wave N の task だけ読む。spec は冒頭のみ。
 
 ### W1. 実装（subagent-driven-development）
 
-`superpowers:subagent-driven-development` を起動し、上書きで運用する。
+`superpowers:subagent-driven-development` を起動し、上書きで運用する（pi では等価物・パスは要確認）。
 
 - SDD の todo と pre-flight conflict scan は wave N の task 間だけで行う。
-- implementer は sonnet、task reviewer は opus。直列のときは implementer が task ごとに commit する。
+- implementer は sonnet、task reviewer は opus（pi では implementer=worker、task reviewer=reviewer。pi の model はいずれも session 継承）。直列のときは implementer が task ごとに commit する。
 - **並列ディスパッチの条件**（すべて満たすとき同 wave 内の task を同時に出す。同時数に上限は無い）:
   - `Files:` (Create / Modify / Test) が互いに素
   - 一方の `Produces` を他方が `Consumes` していない
@@ -328,7 +349,7 @@ plan は `## Waves` と wave N の task だけ読む。spec は冒頭のみ。
 git push -u origin <topic>-w<N>
 ```
 
-root に SendMessage で報告して終わる。PR は作らない:
+root に SendMessage（pi では `herdr agent prompt <root名>`）で報告して終わる。PR は作らない:
 
 ```text
 wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
@@ -353,7 +374,7 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （worker）「起動プロンプトを書いたのは user だ」 | root が herdr 経由で送っている。質問は root へ |
 | （worker）「確認だから user に聞こう」 | worker は user に話しかけない。全部 root |
 | （worker）「ついでに PR まで作っておく」 | push して DONE 報告するだけ |
-| 「小さい変更だから自分で読んで直す」 | 読むのが高い。Explore か implementer に出す |
+| 「小さい変更だから自分で読んで直す」 | 読むのが高い。Explore か implementer に出す（pi では scout か worker） |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問ずつ |
 | 「レビュー中に次の wave を進めておく」 | 待つ。merge してから |
 | 「この指摘は明らかだから rule に書いておく」 | 文面を見せて承認を取る |
