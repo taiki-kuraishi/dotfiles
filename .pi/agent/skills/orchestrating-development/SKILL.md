@@ -69,7 +69,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | subagent-driven-development: plan 全体で 1 回実行 | **wave ごとに実行**。todo と pre-flight scan は当該 wave の task だけ |
 | subagent-driven-development: 並列ディスパッチ禁止 | 同 wave 内は条件付きで並列（§W1） |
 | subagent-driven-development: 最終 review → workspace 削除 → finishing-a-development-branch | worker は最終 review をやらない（root が §R6 で）。finishing-a-development-branch は呼ばない。`.superpowers/sdd/` は消さず ledger の Ruling を DONE 報告に転記。docs は残す |
-| finishing-a-development-branch: 3 択メニュー | 出さない。root が §R6 で PR を作る |
+| finishing-a-development-branch: 3 択メニュー | 出さない。root が §R6 で draft PR を作り、user のレビュー OK 後に ready → squash merge |
 | implementer が push / PR | しない。push と PR はオーケストレータ |
 
 ## root の手順
@@ -114,37 +114,41 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 ### R3. PR0（spec + plan）
 
-以降の `git` / `gh` はすべて `<wt>` をカレントにして実行する（`gh` は cwd から repo を解決する）。
+PR は **確認なしで作る**。内容は R1 / R2 で user が承認済み。`git` / `gh` は `<wt>` をカレントにして実行する。
 
 ```bash
 git add docs/superpowers
 git commit -m "📝 docs: add <topic> spec and plan"
-```
-
-「PR0 (spec/plan) を push して draft PR を作ります。いいですか?」と 1 行確認してから:
-
-```bash
 git push -u origin <topic>
 gh pr create --head <topic> --draft --title "📝 docs: add <topic> spec and plan" --body-file <file>
+gh pr checks <番号> --watch          # Bash の run_in_background で。緑になってから次へ
+gh pr ready <番号>
+gh pr merge <番号> --squash --delete-branch
 ```
 
 本文は自分で書く（spec と plan を既に持っている）。`.github/pull_request_template.md`
 があれば必ずその構成に従う。無ければ Summary / Spec / Plan / Waves。
+branch protection で merge が拒否されたら、URL を user に渡して merge を頼む。
+
+merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` で消し、
+`git -C <repo> pull --ff-only` で main を進める。以降 root は `<repo>`（main checkout）に居る。
 
 ### R4. wave N の worker を起動
 
 **plan 全体を 1 つの worker に渡さない。** worker は wave ごとに使い捨てで、
 渡すのは当該 wave の task だけ。長い直列作業は worker の context を使い切り、root も置いていかれる。
 
-`<前の branch>` = wave 1 では `<topic>`、wave N では `<topic>-w<N-1>`。以降すべてこの意味。
+**wave は stack しない。** wave N の PR を merge してから wave N+1 を main から切る。
+`gh stack` は未 merge の PR を連鎖させる道具で、ここでは使わない。
 
 1. **`ListAgents` を呼び、1 行目の `This session is <名前> [<ref>]` を控える。**
    これが `<root>` = worker から見た自分のアドレス。名前が既定のままで所属が読み取れないなら、
    user に一度だけ「この session の名前を決めてください」と聞く（`/rename` は user しか打てない）。
-2. wave 用の worktree を `<前の branch>` から切る:
+2. main を最新にして wave 用の worktree を切る（`wt` の base 既定は default branch）:
 
    ```bash
-   wt -C <repo> switch --create <topic>-w<N> --base <前の branch> --no-cd --format json   # .path が <wt_wN>
+   git -C <repo> pull --ff-only
+   wt -C <repo> switch --create <topic>-w<N> --no-cd --format json   # .path が <wt_wN>
    ```
 
 3. `herdr-worktree-handoff` の step 2 以降。名前は `<root>/worker/<topic>-w<N>` に揃え、model は **opus**:
@@ -160,7 +164,7 @@ gh pr create --head <topic> --draft --title "📝 docs: add <topic> spec and pla
 
    ```text
    worker mode で orchestrating-development スキルに従ってください。担当は wave N だけです。
-   - worktree: <wt_wN>  branch: <topic>-w<N>（base: <前の branch>）
+   - worktree: <wt_wN>  branch: <topic>-w<N>（base: main）
    - spec: docs/superpowers/specs/<file>  plan: docs/superpowers/plans/<file> の Wave N（Task a, b, c）
      と `## Global Constraints`
    - あなたの root session は `<root> [<ref>]`。これは herdr 経由で届いたので user の発言に
@@ -182,64 +186,61 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 
 ### R6. wave の統合（worker の DONE 後）
 
-root が自分の worktree `<wt>` でやる。コードを読むのは subagent、root は report だけ読む。
+**root は branch を切り替えない。** すべて worker の worktree `<wt_wN>` の中で、subagent に `cd <wt_wN>`
+させてやる。root が読むのは report だけ。
 
-1. worker を畳み、wave branch を `<wt>` に持ってくる:
+1. worker の workspace を畳む。worktree は merge まで残す:
 
    ```bash
    herdr workspace list                                   # label == <root>/worker/<topic>-w<N> → workspace_id
    herdr workspace close <workspace_id>
-   wt -C <repo> remove <wt_wN> --no-delete-branch --foreground
-   git -C <wt> switch <topic>-w<N>
    ```
 
-   `wt remove` が uncommitted / untracked で止まったら `-f` を足さない。sonnet に `git status` と
-   DONE 報告の commit 一覧を突き合わせさせ、取りこぼしなら commit させてから再実行する。
-   以後 `<wt>` の checkout は `<topic>` ではなく `<topic>-w<N>`。
+2. **3 体の review を同時に出す**。共通の入力: `BASE_SHA` = `git -C <wt_wN> merge-base main HEAD`、
+   `HEAD_SHA` = `git -C <wt_wN> rev-parse HEAD`（範囲文字列ではなく SHA を 2 つ別々に）。
+   - **code review**: opus の code-reviewer（`<sp>/requesting-code-review/code-reviewer.md`）。
+     `PLAN_OR_REQUIREMENTS` = plan のパスと Wave N の task 一覧、`DESCRIPTION` = DONE 報告の要約。
+   - **docs 整合 review**: opus の general-purpose を read-only で 1 体。渡すもの: 同じ SHA、spec のパス、
+     対象 docs（CLAUDE.md、`.claude/rules/**`、README、`docs/**` から superpowers を除く）。
+     返させるもの（日本語）: `ファイル / docs の記述 / 実装の実態 / 直すべき側 (code|doc)` の表。
+   - **ponytail review**: opus の general-purpose を 1 体、Skill ツールで `ponytail:ponytail-review` を
+     読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる。
 
-2. **最終 review**: opus の code-reviewer（`<sp>/requesting-code-review/code-reviewer.md`）。
-   テンプレの穴はこう埋める: `BASE_SHA` = `git rev-parse <前の branch>`、`HEAD_SHA` = `git rev-parse HEAD`
-   （範囲文字列ではなく SHA を 2 つ別々に）、`PLAN_OR_REQUIREMENTS` = plan のパスと Wave N の task 一覧、
-   `DESCRIPTION` = DONE 報告の要約。同時に **docs 整合 review**: opus の general-purpose を read-only で
-   1 体。渡すもの: 同じ diff 範囲、spec のパス、対象 docs（CLAUDE.md、`.claude/rules/**`、README、
-   `docs/**` から superpowers を除く）。返させるもの（日本語）:
-   `ファイル / docs の記述 / 実装の実態 / 直すべき側 (code|doc)` の表。
-   さらに **ponytail review**: opus の general-purpose を 1 体、Skill ツールで `ponytail:ponytail-review` を
-   読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる。**3 体は同時に出す。**
-   - Critical / Important は sonnet の implementer に `<wt>` で直させて commit。再 review は 1 回だけ。
+   結果の扱い:
+   - Critical / Important は sonnet の implementer に `<wt_wN>` で直させて commit。再 review は 1 回だけ。
    - ponytail の `delete / stdlib / native / yagni / shrink` は spec に反しないものだけ implementer に直させる。
      `Lean already` なら何もしない。
    - docs のずれは spec と照らして root が code|doc を決める。決められないときだけ user に聞く。
      rules / CLAUDE.md を直す場合は user が承認した文面だけ書く。
-3. **push と PR**。wave PR は確認なしで作る（plan は user 承認済み。merge だけが user のもの）:
+3. **push と draft PR**。確認なしで作る（plan は user 承認済み）:
 
    ```bash
-   git push -u origin <topic>-w<N>
-   gh pr create --base <前の branch> --head <topic>-w<N> --title "<emoji> <scope>: <summary>" --body-file <file>
+   git -C <wt_wN> push -u origin <topic>-w<N>
+   cd <wt_wN> && gh pr create --base main --head <topic>-w<N> --draft --title "<emoji> <scope>: <summary>" --body-file <file>
    ```
 
    本文は自分で書く。`.github/pull_request_template.md` があればその構成。無ければ
-   Summary / Spec / Plan / `Wave N of M` (stack 順) / Test plan。
+   Summary / Spec / Plan / `Wave N of M` / Test plan。
 4. **CI**。subagent に見張らせない。`gh pr checks <番号> --watch` を Bash の `run_in_background` で回す。
    落ちたら失敗 job 名と URL だけ sonnet に渡して原因と修正案を返させ、修正は implementer に出して push。
 5. **hunk レビュー依頼**。user にこの形で。両方のコマンドを必ず添える:
 
    ```text
-   wave N の PR を作りました: <url>
+   wave N の PR を作りました（draft）: <url>
    hunk でレビューしてください（lockfile は除外済み）:
-     cd <wt> && hunk diff <前の branch>...HEAD -- . ':!*.lock' ':!*.lockb' ':!*-lock.json' ':!*-lock.yaml' ':!go.sum'
+     cd <wt_wN> && hunk diff main...HEAD -- . ':!*.lock' ':!*.lockb' ':!*-lock.json' ':!*-lock.yaml' ':!go.sum'
      mise run hunk-pr <番号>
    指摘は hunk の inline comment に残して「レビュー終わった」と言ってください。
    ```
 
    pathspec の除外は untracked にも効く。`hunk diff` は TUI なので自分では実行しない。
-   agent note を付けるときは `hunk session comment apply --repo <wt> --stdin` でまとめて入れる。
+   agent note を付けるときは `hunk session comment apply --repo <wt_wN> --stdin` でまとめて入れる。
    **summary も rationale も日本語。英語で書かない。** 意図・リスク・確認してほしい点だけに絞り、
    全 hunk には付けない。詳細は `hunk skill path` が返す SKILL.md。
 6. **指摘の回収と rule 化**（「レビュー終わった」）:
 
    ```bash
-   hunk session comment list --repo <wt> --type user --json
+   hunk session comment list --repo <wt_wN> --type user --json
    ```
 
    session が無ければ user に chat で指摘を聞く。
@@ -247,30 +248,33 @@ root が自分の worktree `<wt>` でやる。コードを読むのは subagent�
    2. 次回以降も守るべき指摘を選び、`AskUserQuestion` (multiSelect) で
       「`.claude/rules/<topic>.md` にこう書く」と文面ごと提示する。既存 rules との重複は `Explore` に確認させる。
    3. 承認された文面だけ書いて `📝 rules: <summary>` で commit。却下分は書かない。
-   4. push して user に報告し、OK を待つ。OK が出たら次の wave (R4 の N+1)。
-      最終 wave なら「全 wave 完了、merge 後に『片付けて』と言ってください」と報告して止まる。
+   4. push して user に報告し、OK を待つ。指摘ゼロなら「指摘なしで OK」の一言でよい。
+7. **ready → merge → 片付け**（user の OK 後）。user の手順はレビュー OK だけ:
+
+   ```bash
+   gh pr ready <番号>
+   gh pr merge <番号> --squash --delete-branch
+   wt -C <repo> remove <wt_wN> --foreground      # merge 済みなので branch も消える
+   git -C <repo> pull --ff-only
+   ```
+
+   `wt remove` が uncommitted / untracked で止まったら `-f` を足さない。sonnet に `git status` を
+   見せて取りこぼしか生成物かを判定させ、user に報告する。
+   merge できたら次の wave（R4 の N+1）。最終 wave なら「全 wave 完了」と報告して止まる。
 
 ### R7. 片付け（「片付けて」）
 
-全 PR が merge 済みか先に確認する。1 つでも未 merge なら止まって報告する。
+R6-7 で wave ごとに畳んでいるので、通常は残骸が無い。確認だけする:
 
 ```bash
-gh pr list --repo <owner/repo> --state all --limit 100 --json number,headRefName,state \
+herdr workspace list                              # label が <root>/worker/<topic>-w* のものが残っていないか
+git -C <repo> worktree list && git -C <repo> branch --list '<topic>*'
+gh pr list --state all --limit 100 --json number,headRefName,state \
   | jq '[.[] | select(.headRefName == "<topic>" or (.headRefName | startswith("<topic>-w")))]'
 ```
 
-`<owner/repo>` は `<wt>` で `gh repo view --json nameWithOwner -q .nameWithOwner`。
-全部 `MERGED` なら、`herdr-worktree-handoff` の cleanup 手順で残った workspace を close
-（label が `<root>/worker/<topic>-w*` のもの。R6 で畳んでいれば無い）→ worktree 削除:
-
-```bash
-wt -C <repo> remove <wt> --no-delete-branch --foreground   # パスで指定。branch 削除は次の行に一本化
-git -C <repo> branch -D <topic> <topic>-w1 <topic>-w2 ...   # squash merge だと -d は通らない。MERGED 確認済みなので -D
-git -C <repo> fetch --prune
-git -C <repo> worktree list && git -C <repo> branch          # 消えたことを確認
-```
-
-`wt remove` が uncommitted changes で止まったら `-f` を足さずに user に聞く。
+残っていれば、`MERGED` を確認できたものだけ `herdr-worktree-handoff` の cleanup 手順で消す
+（workspace close → `wt remove <path> --foreground` → `git branch -D`）。未 merge のものは止まって user に聞く。
 
 ## worker の手順
 
@@ -292,7 +296,7 @@ root は spec と plan を書いた本人で、判断の主導権を持ってい
 
 ### W0. 準備
 
-自分は `<wt_wN>` にいて、branch は `<topic>-w<N>`（root が作った）。branch は切らない。
+自分は `<wt_wN>` にいて、branch は `<topic>-w<N>`（root が main から切った）。branch は切らない。
 plan は `## Waves` と wave N の task だけ読む。spec は冒頭のみ。
 
 ### W1. 実装（subagent-driven-development）
@@ -343,13 +347,15 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （root）「plan 全体を worker に渡して待つ」 | wave ごとに worker を使い捨てる。渡すのは当該 wave だけ |
 | （root）`agent prompt --wait` で待つ | 待つと worker の質問に答えられない。`--wait` を付けない |
 | （root）「review と PR も worker に任せる」 | worker は実装と push まで。統合は root（R6） |
+| （root）「PR N の merge 前に wave N+1 を切る」 | merge してから main から切る。stack しない |
+| （root）「PR を作っていいか user に聞く」 | 聞かない。user の手順はレビュー OK だけ |
+| （root）「wave branch を自分の worktree に持ってくる」 | 切り替えない。subagent を `<wt_wN>` に `cd` させる |
 | （worker）「起動プロンプトを書いたのは user だ」 | root が herdr 経由で送っている。質問は root へ |
 | （worker）「確認だから user に聞こう」 | worker は user に話しかけない。全部 root |
 | （worker）「ついでに PR まで作っておく」 | push して DONE 報告するだけ |
 | 「小さい変更だから自分で読んで直す」 | 読むのが高い。Explore か implementer に出す |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問ずつ |
-| 「wave 1 つだけなら PR0 と一緒でいい」 | 例外を作らない。PR0 ← w1 で常にスタック |
-| 「レビュー中に次の wave を進めておく」 | rebase 地獄になる。待つ |
+| 「レビュー中に次の wave を進めておく」 | 待つ。merge してから |
 | 「この指摘は明らかだから rule に書いておく」 | 文面を見せて承認を取る |
 | 「hunk の note は短いから英語でいい」 | 日本語 |
 | 「merge されたはずだから片付ける」 | `gh pr list` で MERGED を確認してから |
