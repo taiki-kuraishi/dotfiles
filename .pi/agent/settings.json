@@ -9,9 +9,6 @@
     "npm:pi-web-access",
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
-    "npm:context-mode",
-    "npm:pi-lens",
-    "npm:pi-simplify",
     "npm:@juicesharp/rpiv-todo",
     "git:github.com/DietrichGebert/ponytail",
     "npm:@upstash/context7-pi"
