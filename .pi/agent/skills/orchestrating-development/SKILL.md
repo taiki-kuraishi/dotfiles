@@ -32,8 +32,8 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 **オーケストレータはコードを読まない・書かない。** 高いのは読むことであって書くことではない。
 
-- 自分で読んでよいもの: spec、plan、subagent の報告、hunk のコメント、`.github/pull_request_template.md`、`.claude/rules/**`（pi では `~/.pi/agent/` 配下の rules）の見出し。
-- 自分で書いてよいもの: spec、plan、commit / PR のタイトルと本文、`.claude/rules/**`（pi では `~/.pi/agent/` 配下の rules。いずれも user 承認後）。
+- 自分で読んでよいもの: spec、plan、subagent の報告、hunk のコメント、`.github/pull_request_template.md`、`AGENTS.md`（root と各ディレクトリ）と `.claude/rules/**` の見出し（pi ではさらに `~/.pi/agent/AGENTS.md`）。
+- 自分で書いてよいもの: spec、plan、commit / PR のタイトルと本文、`AGENTS.md`（root / 各ディレクトリ）と `.claude/rules/**`（いずれも user 承認後）。
 - それ以外の読み書き・検証・デバッグはすべて subagent に出す。迷ったら出す。
 
 | 工程 | 委譲先（Claude / pi） | model（Claude / pi） |
@@ -60,7 +60,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | session 一覧 | `ListAgents` | 要確認（`subagent` list 系または intercom の session 名機構） | 未確定 |
 | worker→root 報告 | `SendMessage` | `herdr agent prompt <root名>` | pi での報告経路は要確認 |
 | superpowers 本体 | `<sp>` = `~/.claude/plugins/...` | pi skill 名・パスは要確認（候補: superpowers 6.3.0 の `.pi/extensions` 同梱） | 未確定 |
-| rules | `.claude/rules/**`・`CLAUDE.md` | `~/.pi/agent/` 配下・`AGENTS.md` | |
+| rules | `AGENTS.md`（各ディレクトリ）・`.claude/rules/**`・`CLAUDE.md`（`@AGENTS.md`） | 同じ `AGENTS.md`・`.claude/rules/**`（索引経由で読む）・`~/.pi/agent/AGENTS.md` | 置き場は repo の `.claude/rules/rules.md` が正 |
 
 `<sp>` = `~/.claude/plugins/cache/claude-plugins-official/superpowers/<version>/skills`
 （`ls` で version を確認。以上 Claude）。pi では superpowers 6.3.0 に `.pi/extensions` が同梱されているため、同等の pi skill 名とパス解決を先に確定させる（要確認）。SDD の `scripts/sdd-workspace` / `task-brief` / `review-package` 参照も環境ごとに対応表に従う。
@@ -72,7 +72,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 **質問**: `AskUserQuestion`（pi では質問ツールに読み替える）で 1 メッセージ 1 問。選択肢を用意し、決まったことだけを文書に書く。multiSelect 相当の有無は要確認。
 
 **消さない**: `docs/superpowers/specs/**` と `docs/superpowers/plans/**` は成果物として残す。
-`~/.pi/agent/` 配下の rules と `AGENTS.md` は user の承認なしに変更しない（Claude では `.claude/rules/**` と `CLAUDE.md`）。
+`AGENTS.md`（全階層）・`CLAUDE.md`・`.claude/rules/**`・`~/.pi/agent/AGENTS.md` は user の承認なしに変更しない。
 
 ## superpowers の上書き
 
@@ -126,7 +126,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
   wave 内の task 数に上限は無い（並列に出せる）が、wave をまたぐ作業を 1 つの worker に渡すことはしない。
 - wave ごとに task 一覧（名前・Files・Depends on）を user に提示し、合意した wave から書く。
 - plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を（pi では reviewer＋同等プロンプト。パスは要確認）、
-  もう 1 体に **repo docs 整合**（CLAUDE.md、`.claude/rules/**`、README、`docs/**`。pi では CLAUDE.md→AGENTS.md、`.claude/rules/**`→`~/.pi/agent/` 配下 rules に読み替え）を見せる。
+  もう 1 体に **repo docs 整合**（`AGENTS.md` と `CLAUDE.md` の全階層、`.claude/rules/**`、README、`docs/**`。Claude / pi 共通）を見せる。
   ずれは user と相談して plan か docs のどちらを直すか決める。
 
 ### R3. PR0（spec + plan）
@@ -222,7 +222,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    - **code review**: opus の code-reviewer（`<sp>/requesting-code-review/code-reviewer.md`。pi では reviewer＋同等プロンプト。パスは要確認）。
      `PLAN_OR_REQUIREMENTS` = plan のパスと Wave N の task 一覧、`DESCRIPTION` = DONE 報告の要約。
    - **docs 整合 review**: opus の general-purpose を read-only で 1 体（pi では reviewer を read-only で 1 体）。渡すもの: 同じ SHA、spec のパス、
-     対象 docs（§R2 と同じ。Claude では CLAUDE.md・`.claude/rules/**`、pi では AGENTS.md・`~/.pi/agent/` 配下 rules。README・`docs/**` は共通。superpowers は除く）。
+     対象 docs（§R2 と同じ。`AGENTS.md` と `CLAUDE.md` の全階層、`.claude/rules/**`、README、`docs/**`。superpowers は除く）。
      返させるもの（日本語）: `ファイル / docs の記述 / 実装の実態 / 直すべき側 (code|doc)` の表。
    - **ponytail review**: opus の general-purpose を 1 体、Skill ツールで `ponytail:ponytail-review` を
      読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる（pi での有無は要確認。無ければこの review は省略）。
@@ -232,7 +232,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    - ponytail の `delete / stdlib / native / yagni / shrink` は spec に反しないものだけ implementer に直させる。
      `Lean already` なら何もしない。
    - docs のずれは spec と照らして root が code|doc を決める。決められないときだけ user に聞く。
-     rules（Claude では `.claude/rules/**`、pi では `~/.pi/agent/` 配下）を直す場合は user が承認した文面だけ書く。
+     `AGENTS.md` / `.claude/rules/**` を直す場合は user が承認した文面だけ書く。
 3. **push と draft PR**。確認なしで作る（plan は user 承認済み）:
 
    ```bash
@@ -267,7 +267,9 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    session が無ければ user に chat で指摘を聞く。
    1. 指摘ごとに implementer (sonnet。pi では worker) に修正を出し、commit させる。
    2. 次回以降も守るべき指摘を選び、`AskUserQuestion` (multiSelect)（pi では質問ツールに読み替え。multiSelect 相当の有無は要確認）で
-      「`.claude/rules/<topic>.md`（pi では `~/.pi/agent/` 配下の同等パス）にこう書く」と文面ごと提示する。既存 rules との重複は `Explore`（pi では `scout`）に確認させる。
+      置き場は repo の配置ルール（ax では `.claude/rules/rules.md`）に従う。無ければ 3 種別: ディレクトリに閉じる指摘は `<dir>/AGENTS.md`（隣に `CLAUDE.md` = `@AGENTS.md`）、
+      glob スコープは `.claude/rules/<topic>.md`（`paths:` 付き）+ root `AGENTS.md` の索引、常時は `paths:` なし + root `AGENTS.md` の「セッション開始時に読むルール」。
+      `AGENTS.md` に `@import` は書かない。「`<path>` にこう書く」と文面ごと提示する。既存 rules との重複は `Explore`（pi では `scout`）に確認させる。
    3. 承認された文面だけ書いて `📝 rules: <summary>` で commit。却下分は書かない。
    4. push して user に報告し、OK を待つ。指摘ゼロなら「指摘なしで OK」の一言でよい。
 7. **ready → merge → 片付け**（user の OK 後）。user の手順はレビュー OK だけ:
