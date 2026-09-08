@@ -14,6 +14,10 @@
       "url": "https://mcp.notion.com/mcp",
       "auth": "oauth",
       "protocolVersion": "auto"
+    },
+    "playwright-docker": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "--init", "mcr.microsoft.com/playwright/mcp"]
     }
   }
 }
