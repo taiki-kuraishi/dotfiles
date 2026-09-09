@@ -13,11 +13,11 @@
     "git:github.com/DietrichGebert/ponytail",
     "npm:@upstash/context7-pi",
     "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:pi-background-tasks",
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-usage",
     "npm:pi-intercom",
-    "git:github.com/obra/superpowers"
+    "git:github.com/obra/superpowers",
+    "npm:@aliou/pi-processes"
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
