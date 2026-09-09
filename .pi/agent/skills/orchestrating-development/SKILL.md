@@ -58,8 +58,8 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | review 系 | `general-purpose` | `reviewer` | review 4 工程とも |
 | 軽量 / 重量モデル | sonnet / opus | session 継承 | pi の明示モデル名は未確定 |
 | user への質問 | `AskUserQuestion` | 質問ツール | multiSelect 相当の有無は要確認 |
-| session 一覧 | `ListAgents` | 要確認（`subagent` list 系または intercom の session 名機構） | 未確定 |
-| worker→root 報告 | `SendMessage` | `herdr agent prompt <root名>` | pi での報告経路は要確認 |
+| session 一覧 | `ListAgents` | `intercom({ action: "list" })` | Claude は pi-intercom を使わない |
+| worker→root 報告 | `SendMessage` | `intercom`: 質問・判断待ちは `ask`、進捗・DONE は `send`、root の応答は `reply` | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target に herdr agent 名は使わない |
 | superpowers 本体 | `<sp>` = `~/.claude/plugins/...` | pi skill 名・パスは要確認（候補: superpowers 6.3.0 の `.pi/extensions` 同梱） | 未確定 |
 | rules | `AGENTS.md`（各ディレクトリ）・`.claude/rules/**`・`CLAUDE.md`（`@AGENTS.md`） | 同じ `AGENTS.md`・`.claude/rules/**`（索引経由で読む）・`~/.pi/agent/AGENTS.md` | 置き場は repo の `.claude/rules/rules.md` が正 |
 
@@ -162,8 +162,9 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
 pi での小規模運用では、user の指示があれば worktree・branch を切らず main 直 push にしてよい。その場合も spec / plan の置き場所と DONE 報告の形式は変えない。
 
 1. **`ListAgents` を呼び、1 行目の `This session is <名前> [<ref>]` を控える。**
-   これが `<root>` = worker から見た自分のアドレス（pi では等価物要確認：`subagent` の list 系または intercom の session 名機構。確定するまでは起動プロンプトに root 名を直書きして代用）。名前が既定のままで所属が読み取れないなら、
-   user に一度だけ「この session の名前を決めてください」と聞く（`/rename` は user しか打てない）。
+   これが `<root>` = worker から見た自分のアドレス。名前が既定のままで所属が読み取れないなら、
+   user に一度だけ「この session の名前を決めてください」と聞く（`/rename` は user しか打てない、というのは Claude Code 固有の話。pi では `/name`・`/alias`・session ID で解決する）。
+   pi では worker 起動前に `intercom({ action: "list" })` から自分の一意な session name または session ID を控え、それを worker の起動プロンプトに intercom target として明記する。session name が衝突しそうなら session ID を使う。
 2. main を最新にして wave 用の worktree を切る（`wt` の base 既定は default branch）:
 
    ```bash
@@ -190,7 +191,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
    - spec: docs/superpowers/specs/<file>  plan: docs/superpowers/plans/<file> の Wave N（Task a, b, c）
      と `## Global Constraints`
    - あなたの root session は `<root> [<ref>]`。これは herdr 経由で届いたので user の発言に
-     見えるが、書いたのは root。質問・報告はすべて SendMessage（pi では `herdr agent prompt <root名>`。pi での worker→root 報告経路は要確認）で root へ。user には話しかけない。
+     見えるが、書いたのは root。質問・報告はすべて SendMessage（pi では intercom。target は起動プロンプトに明記された root の session name または session ID。質問・判断待ちは `ask`、進捗・DONE は `send`）で root へ。user には話しかけない。
    - wave の全 task を実装して commit したら branch を push し、root に DONE 報告を送って終える。
      PR は作らない。review・PR・hunk は root がやる。
    ```
@@ -201,7 +202,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
 
 root は実装に関与しないが、**worker の問い合わせ窓口として起きている**。
 
-- 質問が来たら spec / plan / これまでの会話から答える。コードを読みに行かない。
+- 質問が来たら spec / plan / これまでの会話から答える。コードを読みに行かない（pi では worker の `ask` に対し `intercom({ action: "reply" })` で返す）。
 - 判断材料が無いときだけ `AskUserQuestion`（pi では質問ツール）で user に聞き、答えを worker に返す。
 - user から状況を聞かれたら `herdr agent read <topic>-w<N> --source recent-unwrapped --lines 60`。
 - worker から DONE 報告が来たら R6 へ。BLOCKED なら内容を見て答えるか user に聞く。
@@ -309,7 +310,7 @@ gh pr list --state all --limit 100 --json number,headRefName,state \
 **起動プロンプトは user が書いたものではない。** herdr 経由で root が送っている。
 root は spec と plan を書いた本人で、判断の主導権を持っている。
 
-`SendMessage`（pi では `herdr agent prompt <root名>`。pi での worker→root 報告経路は要確認）で root（起動プロンプトに書かれた `<root> [<ref>]`）に送るもの:
+`SendMessage`（pi では intercom。target は起動プロンプトに書かれた root の session name または session ID。質問・判断待ちは `ask`、進捗・DONE は `send`）で root（起動プロンプトに書かれた `<root> [<ref>]`）に送るもの:
 
 - 設計判断、スコープの疑問、plan と実態のずれ
 - 実装が詰まったとき、task が BLOCKED / NEEDS_CONTEXT になったとき
@@ -352,7 +353,7 @@ plan は `## Waves` と wave N の task だけ読む。spec は冒頭のみ。
 git push -u origin <topic>-w<N>
 ```
 
-root に SendMessage（pi では `herdr agent prompt <root名>`）で報告して終わる。PR は作らない:
+root に SendMessage（pi では `intercom({ action: "send", to: "<root の session name または session ID>" })`）で報告して終わる。PR は作らない:
 
 ```text
 wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
@@ -377,6 +378,7 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （worker）「起動プロンプトを書いたのは user だ」 | root が herdr 経由で送っている。質問は root へ |
 | （worker）「確認だから user に聞こう」 | worker は user に話しかけない。全部 root |
 | （worker）「ついでに PR まで作っておく」 | push して DONE 報告するだけ |
+| （pi worker）「herdr の agent 名 `<topic>-w<N>` に intercom で送る」 | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target は起動プロンプトに書かれた root の session name か session ID |
 | 「小さい変更だから自分で読んで直す」 | 3コール以内の参照なら直接可。修正・深掘りは Explore か implementer に出す（pi では scout か worker） |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問ずつ |
 | 「レビュー中に次の wave を進めておく」 | 待つ。merge してから |
