@@ -34,6 +34,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 - 自分で読んでよいもの: spec、plan、subagent の報告、hunk のコメント、`.github/pull_request_template.md`、`AGENTS.md`（root と各ディレクトリ）と `.claude/rules/**` の見出し（pi ではさらに `~/.pi/agent/AGENTS.md`）。
 - 自分で書いてよいもの: spec、plan、commit / PR のタイトルと本文、`AGENTS.md`（root / 各ディレクトリ）と `.claude/rules/**`（いずれも user 承認後）。
+- 直接 tool 使用の上限（3コールルール）: コードベースへの読み書き・実行（read / bash / edit / write 等）は合計3コール以内の確認・参照に限定する。見込み3コール超、テスト・デバッグ、複数ファイルに跨る調査、大量出力が見込まれるコマンドは必ず subagent に出す。subagent の起動と user への質問は数えない。spec / plan 等の文書執筆は root の本務なので数えない。理由は root の context 温存＝判断力の維持。迷ったら出す。
 - それ以外の読み書き・検証・デバッグはすべて subagent に出す。迷ったら出す。
 
 | 工程 | 委譲先（Claude / pi） | model（Claude / pi） |
@@ -376,7 +377,7 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （worker）「起動プロンプトを書いたのは user だ」 | root が herdr 経由で送っている。質問は root へ |
 | （worker）「確認だから user に聞こう」 | worker は user に話しかけない。全部 root |
 | （worker）「ついでに PR まで作っておく」 | push して DONE 報告するだけ |
-| 「小さい変更だから自分で読んで直す」 | 読むのが高い。Explore か implementer に出す（pi では scout か worker） |
+| 「小さい変更だから自分で読んで直す」 | 3コール以内の参照なら直接可。修正・深掘りは Explore か implementer に出す（pi では scout か worker） |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問ずつ |
 | 「レビュー中に次の wave を進めておく」 | 待つ。merge してから |
 | 「この指摘は明らかだから rule に書いておく」 | 文面を見せて承認を取る |
