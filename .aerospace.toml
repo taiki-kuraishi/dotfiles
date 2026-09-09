@@ -223,3 +223,10 @@ gaps.outer.right =      0
     alt-shift-j = ['join-with down', 'mode main']
     alt-shift-k = ['join-with up', 'mode main']
     alt-shift-l = ['join-with right', 'mode main']
+
+# Treat ghostty as floating: macOS native tabs are reported as separate windows
+# by the Accessibility API, which makes AeroSpace re-tile and resize them on
+# tab switches (see ghostty #3170 / AeroSpace #68).
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['layout floating']
