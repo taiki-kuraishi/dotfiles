@@ -15,6 +15,7 @@ bats = "latest"
 rust = "latest"
 
 "cargo:worktrunk" = "latest"
+"npm:@earendil-works/pi-coding-agent" = "latest"
 
 [settings]
 npm.bun = true

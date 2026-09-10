@@ -5,12 +5,12 @@ version = "1.14.0"
 backend = "aqua:bats-core/bats-core"
 
 [tools.bats."platforms.linux-arm64"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [tools.bats."platforms.linux-arm64-musl"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [tools.bats."platforms.linux-x64"]
 checksum = "blake3:9b3dc5d296f3da85ce1062c7f9648c979cf2b982f0151f785eaa84d448dec779"
@@ -18,16 +18,16 @@ url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
 
 [tools.bats."platforms.linux-x64-baseline"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [tools.bats."platforms.linux-x64-musl"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [tools.bats."platforms.linux-x64-musl-baseline"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [tools.bats."platforms.macos-arm64"]
 checksum = "blake3:9b3dc5d296f3da85ce1062c7f9648c979cf2b982f0151f785eaa84d448dec779"
@@ -35,12 +35,12 @@ url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
 url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
 
 [tools.bats."platforms.macos-x64"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [tools.bats."platforms.macos-x64-baseline"]
-url = "https://github.com/bats-core/bats-core/archive/refs/tags/v1.14.0.tar.gz"
-url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/v1.14.0"
+url = "https://github.com/bats-core/bats-core/archive/refs/tags/1.14.0.tar.gz"
+url_api = "https://api.github.com/repos/bats-core/bats-core/tarball/1.14.0"
 
 [[tools.bun]]
 version = "1.4.2"
@@ -242,6 +242,10 @@ url = "https://nodejs.org/dist/v26.8.1/node-v26.8.1-win-x64.zip"
 checksum = "sha256:57693d8e93d1b04e7b7de46aca53ecd63e97564e73de36a68428d7ff08d83587"
 url = "https://nodejs.org/dist/v26.8.1/node-v26.8.1-win-x64.zip"
 
+[[tools."npm:@earendil-works/pi-coding-agent"]]
+version = "0.85.1"
+backend = "npm:@earendil-works/pi-coding-agent"
+
 [[tools."npm:typescript"]]
 version = "7.0.2"
 backend = "npm:typescript"
@@ -313,7 +317,7 @@ url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/544431954"
 provenance = "github-attestations"
 
 [[tools.rust]]
-version = "1.98.1"
+version = "1.97.1"
 backend = "core:rust"
 
 [[tools.uv]]
