@@ -172,13 +172,24 @@ pi での小規模運用では、user の指示があれば worktree・branch �
    wt -C <repo> switch --create <topic>-w<N> --no-cd --format json   # .path が <wt_wN>
    ```
 
-3. `herdr-worktree-handoff` の step 2 以降。名前は `<root>/worker/<topic>-w<N>` に揃え、model は **opus**（Claude）:
+3. `wt` が作った worktree を **root の workspace に linked worktree として開く**。独立した
+   workspace は作らない（worker が user の workspace から切り離される）。名前は
+   `<root>/worker/<topic>-w<N>` に揃え、model は **opus**（Claude）:
 
    ```bash
-   herdr workspace create --cwd <wt_wN> --label "<root>/worker/<topic>-w<N>" --no-focus
+   herdr worktree open --workspace "$HERDR_WORKSPACE_ID" --path <wt_wN> \
+     --label "<root>/worker/<topic>-w<N>" --no-focus
+   #   → .result.workspace.workspace_id = <worker_workspace_id>
+   #     .result.root_pane.pane_id    = <pane_id>
    herdr agent start <topic>-w<N> --kind claude --pane <pane_id> --timeout 60000 -- \
      --model opus --permission-mode auto -n "<root>/worker/<topic>-w<N>"
    ```
+
+   `--workspace` は開き先の**親 workspace**、`--path` は `wt` が作った**既存の linked worktree**。
+   `$HERDR_WORKSPACE_ID` は Herdr が root の pane に注入した root 自身の workspace id なので、
+   focus 済み workspace や推測 id に依存せず必ず root の下に付く。
+   返ってきた `<worker_workspace_id>` と `<pane_id>` を控え、`<pane_id>` で agent を起動し、
+   R6-1 の close と R4-5 の報告ではその控えた値を使う（label での再検索は前提にしない）。
 
    （pi では `--kind pi` にし、`--model` / `--permission-mode auto` は付けず session 継承。`--permission-mode auto` 相当の有無は要確認）
 
@@ -196,7 +207,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
      PR は作らない。review・PR・hunk は root がやる。
    ```
 
-5. branch / worktree / workspace id / agent 名を user に報告して R5 へ。
+5. branch / worktree / `<worker_workspace_id>` / agent 名を user に報告して R5 へ。
 
 ### R5. 応答
 
@@ -212,11 +223,10 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 **root は branch を切り替えない。** すべて worker の worktree `<wt_wN>` の中で、subagent に `cd <wt_wN>`
 させてやる。root が読むのは report だけ。
 
-1. worker の workspace を畳む。worktree は merge まで残す:
+1. worker の workspace を畳む（R4 で控えた `<worker_workspace_id>`）。worktree は merge まで残す:
 
    ```bash
-   herdr workspace list                                   # label == <root>/worker/<topic>-w<N> → workspace_id
-   herdr workspace close <workspace_id>
+   herdr workspace close <worker_workspace_id>
    ```
 
 2. **3 体の review を同時に出す**。共通の入力: `BASE_SHA` = `git -C <wt_wN> merge-base main HEAD`、
