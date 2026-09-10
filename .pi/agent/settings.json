@@ -66,19 +66,19 @@
         "disabled": true
       },
       "scout": {
-        "model": "opencode-go/glm-5.3-flash",
+        "model": "opencode-go/deepseek-flash",
         "thinking": "low"
       },
       "researcher": {
-        "model": "opencode-go/glm-5.3-flash",
+        "model": "opencode-go/deepseek-flash",
         "thinking": "high"
       },
       "worker": {
-        "model": "opencode-go/glm-5.3-flash",
+        "model": "opencode-go/deepseek-flash",
         "thinking": "high"
       },
       "reviewer": {
-        "model": "opencode-go/glm-5.3-flash",
+        "model": "opencode-go/deepseek-flash",
         "thinking": "high"
       }
     }
