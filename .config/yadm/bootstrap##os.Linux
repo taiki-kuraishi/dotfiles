@@ -43,6 +43,7 @@ mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claud
 mise x -- bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
 mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
 mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent pi
+mise x -- bunx skills add https://github.com/stablyai/orca --skill orca-cli --skill computer-use --skill orchestration -g -y --agent pi --agent claude-code
 
 if ! command -v dockerd >/dev/null 2>&1 \
   && [ -d /run/systemd/system ] \
