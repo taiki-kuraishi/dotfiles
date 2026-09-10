@@ -28,4 +28,6 @@ fi
 if command -v bunx >/dev/null 2>&1; then
   bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
   bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
+  bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
+  bunx skills add herdrdev/herdr --skill herdr -g -y --agent pi
 fi
