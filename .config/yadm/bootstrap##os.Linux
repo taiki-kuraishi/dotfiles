@@ -31,6 +31,14 @@ if [ ! -x "$HOME/.local/bin/pi" ]; then
   mise x -- npm install -g --prefix "$HOME/.local" --ignore-scripts @earendil-works/pi-coding-agent
 fi
 
+# Orca (stably.ai): AppImage needs FUSE at runtime (e.g. libfuse2 on Debian/Ubuntu)
+if [ ! -x "$HOME/.local/bin/orca-linux.AppImage" ]; then
+  mkdir -p "$HOME/.local/bin"
+  curl -fL https://github.com/stablyai/orca/releases/latest/download/orca-linux.AppImage \
+    -o "$HOME/.local/bin/orca-linux.AppImage"
+  chmod +x "$HOME/.local/bin/orca-linux.AppImage"
+fi
+
 mise x -- bunx skills add mattpocock/skills --skill grill-me -g -y --agent claude-code
 mise x -- bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
 mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
