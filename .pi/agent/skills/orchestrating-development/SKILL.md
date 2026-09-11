@@ -57,7 +57,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | Web 調査 | `general-purpose` に含む | `researcher` に分離 | pi のみ分離 |
 | review 系 | `general-purpose` | `reviewer` | review 4 工程とも |
 | 軽量 / 重量モデル | sonnet / opus | session 継承 | pi の明示モデル名は未確定 |
-| user への質問 | `AskUserQuestion` | 質問ツール | multiSelect 相当の有無は要確認 |
+| user への質問 | `AskUserQuestion` | `ask_user_question` | pi は `multiSelect` / `preview` あり。R1 / R2 は 1 回 1 問 |
 | session 一覧 | `ListAgents` | `intercom({ action: "list" })` | Claude は pi-intercom を使わない |
 | worker→root 報告 | `SendMessage` | `intercom`: 質問・判断待ちは `ask`、進捗・DONE は `send`、root の応答は `reply` | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target に herdr agent 名は使わない |
 | superpowers 本体 | `<sp>` = `~/.claude/plugins/...` | pi skill 名・パスは要確認（候補: superpowers 6.3.0 の `.pi/extensions` 同梱） | 未確定 |
@@ -70,7 +70,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 **言語**: spec、plan、user への質問、hunk の agent note は**日本語**。commit と PR は
 **English + gitmoji** (`<emoji> <scope>: <summary>`、imperative)。
 
-**質問**: `AskUserQuestion`（pi では質問ツールに読み替える）で 1 メッセージ 1 問。選択肢を用意し、決まったことだけを文書に書く。multiSelect 相当の有無は要確認。
+**質問**: `AskUserQuestion`（pi では `ask_user_question`）で 1 メッセージ 1 問。pi では 1 回の呼び出しの `questions` に 1 問だけ入れる（`multiSelect` / `preview` は使えるが、複数問を 1 回にまとめるのは R6-6 だけ）。選択肢を用意し、決まったことだけを文書に書く。
 
 **消さない**: `docs/superpowers/specs/**` と `docs/superpowers/plans/**` は成果物として残す。
 `AGENTS.md`（全階層）・`CLAUDE.md`・`.claude/rules/**`・`~/.pi/agent/AGENTS.md` は user の承認なしに変更しない。
@@ -80,7 +80,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | superpowers | このスキル |
 | --- | --- |
 | brainstorming: spike / bounded / architectural を分類 | 常に **architectural**。spec と plan を必ず書く |
-| brainstorming: 設計をまとめて提示 | 1 問ずつ聞き、合意した節から spec に追記 |
+| brainstorming: 設計をまとめて提示 | 1 問ずつ聞き、合意した節から spec に追記（§R1 の作法。一括確認は禁止）|
 | writing-plans: task を直列に並べる | `Depends on:` と `## Waves` を書く。1 wave = 1 PR |
 | writing-plans: 全 task を一度に書く | wave ごとに task 一覧を提示し、合意分だけ書く |
 | writing-plans: self-review は自分で | 自分でやった上で、opus の plan reviewer（pi では reviewer）にも出す（§R2） |
@@ -96,6 +96,15 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 `superpowers:brainstorming` を起動し、**architectural path** で上の上書き通りに運用する。調査は `Explore`（pi では `scout`＝コード / `researcher`＝Web）に分けて出す。
 
+**R1 の作法（例外なし）**。以下に反したら、書いた分は捨てて質問からやり直す:
+
+- **1 turn = 1 問。** 質問ツールは 1 回の呼び出しに 1 問だけ入れる（pi の `questions` は常に長さ 1）。1 問出して止まる。回答が来たら、**その 1 節だけ**を spec に追記し、次の 1 問を出す。
+- **spec ファイルを先に開かない。** topic と branch 名を決める数問 → 最初の節の合意 → ここで初めて `<wt>/docs/superpowers/specs/...` を作る。ファイルが無ければ全部書きようがない。
+- **「これでいいですか」の一括確認をしない。** 全節が埋まった後の最終確認（step 4）だけが一括確認。
+- 未合意の節・placeholder・仮置きを書かない。書きたくなった節は、書く代わりに**その節の質問を作って聞く**。
+- 書く前に自己チェック: **「これから spec に足す行は、直前の回答で user が合意した内容か?」** No なら書かない。
+- `superpowers:brainstorming` の "Present design in sections, get user approval after each section" は、このスキルでは **「1 問ずつ質問し、合意した節だけを spec に追記する」** に読み替える。設計をチャットで提示して承認を待つのではなく、question と spec 追記の往復で合意を取る。
+
 1. 最初の数問で topic と branch 名 `<topic>` を決める（`[a-z][a-z0-9_-]` で 28 文字以内。
    herdr の agent 名 `<topic>-w<N>` が 32 文字制限）。
 2. 決まった時点で worktree を作る。main checkout は触らない。
@@ -106,7 +115,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
    ```
 
 3. spec は `<wt>/docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`。
-   合意した節（目的 / スコープ外 / 要件 / 設計 / エラー処理 / テスト方針）を順に追記する。
+   **1 問の回答につき 1 節だけ**追記する。合意した節（目的 / スコープ外 / 要件 / 設計 / エラー処理 / テスト方針）を順に追記する。
    未合意の節は書かない。placeholder も書かない。
 4. 全節が埋まったら spec self-review、user に確認して R2 へ。
 
@@ -125,7 +134,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 
 - 1 wave = 1 PR = 1 worker session。各 wave が単独で CI 緑になる境界で切る。切れないなら理由を plan に書く。
   wave 内の task 数に上限は無い（並列に出せる）が、wave をまたぐ作業を 1 つの worker に渡すことはしない。
-- wave ごとに task 一覧（名前・Files・Depends on）を user に提示し、合意した wave から書く。
+- wave ごとに task 一覧（名前・Files・Depends on）を user に提示し、**合意した wave から書く**。提示 → 合意 → その wave だけ書く、の順で、plan 全体を先に書かない。`## Waves` の合意 → Wave 1 の task 一覧の合意 → Wave 1 を書く、と 1 turn 1 問で進める。
 - plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を（pi では reviewer＋同等プロンプト。パスは要確認）、
   もう 1 体に **repo docs 整合**（`AGENTS.md` と `CLAUDE.md` の全階層、`.claude/rules/**`、README、`docs/**`。Claude / pi 共通）を見せる。
   ずれは user と相談して plan か docs のどちらを直すか決める。
@@ -287,7 +296,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 
    session が無ければ user に chat で指摘を聞く。
    1. 指摘ごとに implementer (sonnet。pi では worker) に修正を出し、commit させる。
-   2. 次回以降も守るべき指摘を選び、`AskUserQuestion` (multiSelect)（pi では質問ツールに読み替え。multiSelect 相当の有無は要確認）で
+   2. 次回以降も守るべき指摘を選び、`AskUserQuestion` (multiSelect)（pi では `ask_user_question`。ここだけは複数問を 1 回にまとめてよい）で
       置き場は repo の配置ルール（ax では `.claude/rules/rules.md`）に従う。無ければ 3 種別: ディレクトリに閉じる指摘は `<dir>/AGENTS.md`（隣に `CLAUDE.md` = `@AGENTS.md`）、
       glob スコープは `.claude/rules/<topic>.md`（`paths:` 付き）+ root `AGENTS.md` の索引、常時は `paths:` なし + root `AGENTS.md` の「セッション開始時に読むルール」。
       `AGENTS.md` に `@import` は書かない。「`<path>` にこう書く」と文面ごと提示する。既存 rules との重複は `Explore`（pi では `scout`）に確認させる。
@@ -400,7 +409,8 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （worker）「ついでに PR まで作っておく」 | push して DONE 報告するだけ |
 | （pi worker）「herdr の agent 名 `<topic>-w<N>` に intercom で送る」 | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target は起動プロンプトに書かれた root の session name か session ID |
 | 「小さい変更だから自分で読んで直す」 | 3コール以内の参照なら直接可。修正・深掘りは Explore か implementer に出す（pi では scout か worker） |
-| 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問ずつ |
+| 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問 → 回答 → その 1 節だけ追記 → 次の 1 問 |
+| 「質問をまとめて 4 問聞けば効率的」 | R1 / R2 は 1 回 1 問。まとめて聞くと、回答を待たずに未合意の節まで書き始める（一括確認で返ってくる） |
 | 「レビュー中に次の wave を進めておく」 | 待つ。merge してから |
 | 「この指摘は明らかだから rule に書いておく」 | 文面を見せて承認を取る |
 | 「hunk の note は短いから英語でいい」 | 日本語 |
