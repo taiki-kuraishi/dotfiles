@@ -40,10 +40,6 @@
         name = "FelixKratz/formulae";
         trusted = true;
       }
-      {
-        name = "stablyai/orca";
-        trusted = true;
-      }
     ];
     brews = [
       "bitwarden-cli"
@@ -62,12 +58,6 @@
       "font-hackgen-nerd"
       {
         name = "nikitabobko/tap/aerospace";
-        trusted = true;
-      }
-      # bare "orca" collides with homebrew/cask's plotly Orca, so use the
-      # fully-qualified name from the stablyai/orca tap
-      {
-        name = "stablyai/orca/orca";
         trusted = true;
       }
     ];
