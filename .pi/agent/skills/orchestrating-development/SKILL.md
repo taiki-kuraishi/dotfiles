@@ -67,7 +67,7 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 | Web 調査 | `general-purpose` に含む | `researcher` に分離 | pi のみ分離 |
 | review 系 | `general-purpose` | `reviewer` | review 4 工程とも |
 | 軽量 / 重量モデル | sonnet / opus | session 継承 | pi の明示モデル名は未確定 |
-| user への質問 | `AskUserQuestion` | `ask_user_question` | pi は `multiSelect` / `preview` あり。R1 / R2 は 1 回 1 問 |
+| user への質問 | `AskUserQuestion` | `ask_user_question` | pi は `multiSelect` / `preview` あり。R1 は 1 回 1 問 |
 | session 一覧 | `ListAgents` | `intercom({ action: "list" })` | Claude は pi-intercom を使わない |
 | worker→root 報告 | `SendMessage` | `intercom`: 質問・判断待ちは `ask`、進捗・DONE は `send`、root の応答は `reply` | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target に herdr agent 名は使わない |
 | superpowers 本体 | `<sp>` = `~/.claude/plugins/...` | pi skill 名・パスは要確認（候補: superpowers 6.3.0 の `.pi/extensions` 同梱） | 未確定 |
@@ -92,7 +92,6 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 | brainstorming: spike / bounded / architectural を分類 | 常に **architectural**。spec と plan を必ず書く |
 | brainstorming: 設計をまとめて提示 | 1 問ずつ聞き、合意した節から spec に追記（§R1 の作法。一括確認は禁止）|
 | writing-plans: task を直列に並べる | `Depends on:` と `## Waves` を書く。1 wave = 1 PR |
-| writing-plans: 全 task を一度に書く | wave ごとに task 一覧を提示し、合意分だけ書く |
 | writing-plans: self-review は自分で | 自分でやった上で、opus の plan reviewer（pi では reviewer）にも出す（§R2） |
 | subagent-driven-development: plan 全体で 1 回実行 | **wave ごとに実行**。todo と pre-flight scan は当該 wave の task だけ |
 | subagent-driven-development: 並列ディスパッチ禁止 | 同 wave 内は条件付きで並列（§W1） |
@@ -144,14 +143,14 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 
 - 1 wave = 1 PR = 1 worker session。各 wave が単独で CI 緑になる境界で切る。切れないなら理由を plan に書く。
   wave 内の task 数に上限は無い（並列に出せる）が、wave をまたぐ作業を 1 つの worker に渡すことはしない。
-- wave ごとに task 一覧（名前・Files・Depends on）を user に提示し、**合意した wave から書く**。提示 → 合意 → その wave だけ書く、の順で、plan 全体を先に書かない。`## Waves` の合意 → Wave 1 の task 一覧の合意 → Wave 1 を書く、と 1 turn 1 問で進める。
+- task の切り方・粒度・wave 分けは root が spec から決め、**user に確認せず plan 全体を書く**。質は下の plan review で担保する。user に聞くのは spec に無い要件の判断だけで、task 構成の確認には使わない。
 - plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を（pi では reviewer＋同等プロンプト。パスは要確認）、
   もう 1 体に **repo docs 整合**（`AGENTS.md` と `CLAUDE.md` の全階層、`.claude/rules/**`、README、`docs/**`。Claude / pi 共通）を見せる。
   ずれは user と相談して plan か docs のどちらを直すか決める。
 
 ### R3. PR0（spec + plan）
 
-PR は **確認なしで作る**。内容は R1 / R2 で user が承認済み。`git` / `gh` は `<wt>` をカレントにして実行する。
+PR は **確認なしで作る**。spec は R1 で user が承認済み、plan は R2 の review 済み。`git` / `gh` は `<wt>` をカレントにして実行する。
 
 ```bash
 git add docs/superpowers
@@ -469,7 +468,8 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （pi worker）「herdr の agent 名 `<topic>-w<N>` に intercom で送る」 | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target は起動プロンプトに書かれた root の session name か session ID |
 | 「小さい変更だから自分で読んで直す」 | 3コール以内の参照なら直接可。修正・深掘りは Explore か implementer に出す（pi では scout か worker） |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問 → 回答 → その 1 節だけ追記 → 次の 1 問 |
-| 「質問をまとめて 4 問聞けば効率的」 | R1 / R2 は 1 回 1 問。まとめて聞くと、回答を待たずに未合意の節まで書き始める（一括確認で返ってくる） |
+| 「質問をまとめて 4 問聞けば効率的」 | R1 は 1 回 1 問。まとめて聞くと、回答を待たずに未合意の節まで書き始める（一括確認で返ってくる） |
+| 「task の切り方や粒度を user に確認しよう」 | 聞かない。task 構成・粒度・wave 分けは root が決め、plan review で担保する |
 | 「レビュー中に次の wave を進めておく」 | 待つ。merge してから |
 | 「この指摘は明らかだから rule に書いておく」 | 文面を見せて承認を取る |
 | 「hunk の note は短いから英語でいい」 | 日本語 |
