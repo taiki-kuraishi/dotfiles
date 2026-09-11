@@ -17,7 +17,8 @@
     "npm:@narumitw/pi-usage",
     "npm:pi-intercom",
     "git:github.com/obra/superpowers",
-    "npm:@aliou/pi-processes"
+    "npm:@aliou/pi-processes",
+    "npm:pi-claude-code-provider"
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
