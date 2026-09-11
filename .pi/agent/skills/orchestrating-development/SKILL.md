@@ -172,24 +172,30 @@ pi での小規模運用では、user の指示があれば worktree・branch �
    wt -C <repo> switch --create <topic>-w<N> --no-cd --format json   # .path が <wt_wN>
    ```
 
-3. `wt` が作った worktree を **root の workspace に linked worktree として開く**。独立した
-   workspace は作らない（worker が user の workspace から切り離される）。名前は
+3. worker は **root と同じ workspace の pane** として開く。workspace は作らない。root を左半分に
+   固定し、右半分を worker に使う（git の隔離は `wt` の worktree が担う）。名前は
    `<root>/worker/<topic>-w<N>` に揃え、model は **opus**（Claude）:
 
    ```bash
-   herdr worktree open --workspace "$HERDR_WORKSPACE_ID" --path <wt_wN> \
-     --label "<root>/worker/<topic>-w<N>" --no-focus
-   #   → .result.workspace.workspace_id = <worker_workspace_id>
-   #     .result.root_pane.pane_id    = <pane_id>
+   # 1体目（右カラムが空のとき）: root の右半分を割る。root は左に残る
+   herdr pane split --pane "$HERDR_PANE_ID" --direction right --ratio 0.5 \
+     --cwd <wt_wN> --no-focus
+   # 2体目以降（直前の worker pane がまだ開いているとき）: その pane を下に割る
+   herdr pane split --pane <prev_worker_pane> --direction down \
+     --cwd <wt_wN> --no-focus
+   #   → .result.pane.pane_id = <pane_id>
+   herdr pane rename <pane_id> "<root>/worker/<topic>-w<N>"
    herdr agent start <topic>-w<N> --kind claude --pane <pane_id> --timeout 60000 -- \
      --model opus --permission-mode auto -n "<root>/worker/<topic>-w<N>"
    ```
 
-   `--workspace` は開き先の**親 workspace**、`--path` は `wt` が作った**既存の linked worktree**。
-   `$HERDR_WORKSPACE_ID` は Herdr が root の pane に注入した root 自身の workspace id なので、
-   focus 済み workspace や推測 id に依存せず必ず root の下に付く。
-   返ってきた `<worker_workspace_id>` と `<pane_id>` を控え、`<pane_id>` で agent を起動し、
-   R6-1 の close と R4-5 の報告ではその控えた値を使う（label での再検索は前提にしない）。
+   `--cwd <wt_wN>` を必ず渡す（root の cwd を引き継がせない）。`--direction` は `right` / `down` のみ。
+   返ってきた `<pane_id>` を控え、R6-1 の close と R4-5 の報告ではその控えた値を使う
+   （label での再検索は前提にしない）。
+
+   **`herdr worktree open` は使わない。** root の pane が linked worktree 側にあると
+   `linked_worktree_source` で失敗し、root の下にネストした workspace は作れない（herdr 0.9 で
+   group ルートになれるのは repo 本体の workspace だけ）。pane 方式なら root の起動場所に依存しない。
 
    （pi では `--kind pi` にし、`--model` / `--permission-mode auto` は付けず session 継承。`--permission-mode auto` 相当の有無は要確認）
 
@@ -207,7 +213,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
      PR は作らない。review・PR・hunk は root がやる。
    ```
 
-5. branch / worktree / `<worker_workspace_id>` / agent 名を user に報告して R5 へ。
+5. branch / worktree / worker の pane id / agent 名を user に報告して R5 へ。
 
 ### R5. 応答
 
@@ -223,11 +229,14 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 **root は branch を切り替えない。** すべて worker の worktree `<wt_wN>` の中で、subagent に `cd <wt_wN>`
 させてやる。root が読むのは report だけ。
 
-1. worker の workspace を畳む（R4 で控えた `<worker_workspace_id>`）。worktree は merge まで残す:
+1. worker の pane は **R6-3 まで残す**（レビュー中に `herdr agent read <topic>-w<N>` で見返せる）。
+   draft PR を作ったら閉じる。worktree は merge まで残す:
 
    ```bash
-   herdr workspace close <worker_workspace_id>
+   herdr pane close <pane_id>          # R4 で控えた <pane_id>。R6-3 の後
    ```
+
+   閉じると右カラムが空に戻るので、次の wave はまた root を右に割って 50/50 から始まる。
 
 2. **3 体の review を同時に出す**。共通の入力: `BASE_SHA` = `git -C <wt_wN> merge-base main HEAD`、
    `HEAD_SHA` = `git -C <wt_wN> rev-parse HEAD`（範囲文字列ではなく SHA を 2 つ別々に）。
@@ -302,14 +311,14 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 R6-7 で wave ごとに畳んでいるので、通常は残骸が無い。確認だけする:
 
 ```bash
-herdr workspace list                              # label が <root>/worker/<topic>-w* のものが残っていないか
+herdr pane list --workspace "$HERDR_WORKSPACE_ID"   # 残っている worker pane が無いか
 git -C <repo> worktree list && git -C <repo> branch --list '<topic>*'
 gh pr list --state all --limit 100 --json number,headRefName,state \
   | jq '[.[] | select(.headRefName == "<topic>" or (.headRefName | startswith("<topic>-w")))]'
 ```
 
 残っていれば、`MERGED` を確認できたものだけ `herdr-worktree-handoff` の cleanup 手順で消す
-（workspace close → `wt remove <path> --foreground` → `git branch -d`）。未 merge のものは止まって user に聞く。
+（`herdr pane close <pane_id>` → `wt remove <path> --foreground` → `git branch -d`）。未 merge のものは止まって user に聞く。
 
 ## worker の手順
 
@@ -381,6 +390,7 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | --- | --- |
 | （root）「plan 全体を worker に渡して待つ」 | wave ごとに worker を使い捨てる。渡すのは当該 wave だけ |
 | （root）`agent prompt --wait` で待つ | 待つと worker の質問に答えられない。`--wait` を付けない |
+| （root）「worker を root の下の workspace としてネストさせる」 | worker は同一 workspace の pane。`herdr worktree open` は root が linked worktree 側に居ると `linked_worktree_source` で失敗する |
 | （root）「review と PR も worker に任せる」 | worker は実装と push まで。統合は root（R6） |
 | （root）「PR N の merge 前に wave N+1 を切る」 | merge してから main から切る。stack しない |
 | （root）「PR を作っていいか user に聞く」 | 聞かない。user の手順はレビュー OK だけ |
