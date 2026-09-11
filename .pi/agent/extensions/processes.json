@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/@aliou/pi-processes@0.12.0/schema.json",
+  "version": "0.10.6",
+  "widget": {
+    "showStatusWidget": true,
+    "dockDefaultState": "closed",
+    "dockHeight": 12
+  }
+}
