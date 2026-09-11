@@ -14,7 +14,8 @@
     "superpowers@claude-plugins-official": true,
     "notion@claude-plugins-official": true,
     "cloudflare@claude-plugins-official": true,
-    "worktrunk@worktrunk": true
+    "worktrunk@worktrunk": true,
+    "figma@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "ponytail": {
