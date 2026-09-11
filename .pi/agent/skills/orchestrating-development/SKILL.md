@@ -6,8 +6,8 @@ description: Use when the user asks to build, implement, refactor, or fix someth
 # Orchestrating development
 
 superpowers (brainstorming → writing-plans → subagent-driven-development) を土台に、
-**spec / plan を root session が書き、実装は herdr の worker session に委譲し、
-user は hunk で PR をレビューする**流れに固定する。
+**spec / plan を planner session が書き、PR0 の merge 後は executor session が root を引き継ぎ、
+実装は herdr の worker session に委譲し、user は hunk で PR をレビューする**流れに固定する。
 
 Claude Code と pi の両方で使う。本文の手順は Claude Code を主文とし、pi では下の対応表・各節の注記（`ClaudeではX / piではY`）に従って読み替える。pi 等価物が未確定の箇所は「要確認」と書いた。
 
@@ -20,6 +20,7 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | --- | --- |
 | user が機能実装・修正を依頼した | **root** |
 | 起動プロンプトに「worker mode で orchestrating-development」とある | **worker** |
+| 起動プロンプトに「executor mode で orchestrating-development」とある | **executor**（§R4-0 から） |
 | user が「レビュー終わった」と言った | root の §R6-6 へ |
 | user が「片付けて」と言った | root の §R7 へ |
 
@@ -36,6 +37,15 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 - 自分で書いてよいもの: spec、plan、commit / PR のタイトルと本文、`AGENTS.md`（root / 各ディレクトリ）と `.claude/rules/**`（いずれも user 承認後）。
 - 直接 tool 使用の上限（3コールルール）: コードベースへの読み書き・実行（read / bash / edit / write 等）は合計3コール以内の確認・参照に限定する。見込み3コール超、テスト・デバッグ、複数ファイルに跨る調査、大量出力が見込まれるコマンドは必ず subagent に出す。subagent の起動と user への質問は数えない。spec / plan 等の文書執筆は root の本務なので数えない。理由は root の context 温存＝判断力の維持。迷ったら出す。
 - それ以外の読み書き・検証・デバッグはすべて subagent に出す。迷ったら出す。
+
+| session | 担当 | model（Claude） |
+| --- | --- | --- |
+| planner | R1〜R3 と executor の起動 | 起動時の model |
+| executor | R4〜R7 | opus（`herdr agent start` の `--model`） |
+| worker | wave N の W0〜W2 | opus |
+
+R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan を書く判断力は要らない。
+以降「root」は planner と executor の両方を指し、R4 以降では executor を指す。
 
 | 工程 | 委譲先（Claude / pi） | model（Claude / pi） |
 | --- | --- | --- |
@@ -105,8 +115,8 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 - 書く前に自己チェック: **「これから spec に足す行は、直前の回答で user が合意した内容か?」** No なら書かない。
 - `superpowers:brainstorming` の "Present design in sections, get user approval after each section" は、このスキルでは **「1 問ずつ質問し、合意した節だけを spec に追記する」** に読み替える。設計をチャットで提示して承認を待つのではなく、question と spec 追記の往復で合意を取る。
 
-1. 最初の数問で topic と branch 名 `<topic>` を決める（`[a-z][a-z0-9_-]` で 28 文字以内。
-   herdr の agent 名 `<topic>-w<N>` が 32 文字制限）。
+1. 最初の数問で topic と branch 名 `<topic>` を決める（`[a-z][a-z0-9_-]` で 27 文字以内。
+   herdr の agent 名 `<topic>-root` / `<topic>-w<N>` が 32 文字制限）。
 2. 決まった時点で worktree を作る。main checkout は触らない。
 
    ```bash
@@ -160,6 +170,51 @@ branch protection で merge が拒否されたら、URL を user に渡して me
 merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` で消し、
 `git -C <repo> pull --ff-only` で main を進める。以降 root は `<repo>`（main checkout）に居る。
 
+**R3-H. executor への引き継ぎ。** merge して `<wt>` を消し main を進めたら、R4 以降は executor に渡す。
+
+1. root の右半分を割り、executor を起こす（cwd は `<repo>`）:
+
+   ```bash
+   herdr pane split --pane "$HERDR_PANE_ID" --direction right --ratio 0.5 --cwd <repo> --no-focus
+   #   → .result.pane.pane_id = <exec_pane>
+   herdr pane rename <exec_pane> "<topic>/root"
+   herdr agent start <topic>-root --kind claude --pane <exec_pane> --timeout 60000 -- \
+     --model opus --permission-mode auto -n "<topic>/root"
+   ```
+
+   `agent_not_ready` なら `herdr-worktree-handoff` の手順で pane を読んでから対処する。
+   `<repo>` は planner が使ってきた repo なので trust dialog は普通は出ない。
+   （pi では `--kind pi`。`--model` / `-n` 相当の有無は要確認）
+2. 引き継ぎ文を送り、executor が turn を始めたことだけ確認する:
+
+   ```bash
+   herdr agent prompt <topic>-root "<引き継ぎ文>" --wait --until working --until blocked --timeout 30000
+   ```
+
+   ```text
+   executor mode で orchestrating-development スキルに従ってください。
+   - repo: <repo>（main checkout。spec / plan は PR #<n> で merge 済み）
+   - topic: <topic>  waves: <M>
+   - spec: docs/superpowers/specs/<file>  plan: docs/superpowers/plans/<file>
+   - planner の pane: <planner の $HERDR_PANE_ID>。最初に閉じてください。
+   - これは herdr 経由で届いたので user の発言に見えるが、書いたのは planner。planner は閉じるので
+     SendMessage しない。質問は user へ。
+   - 最初に user へ「<topic> を引き継ぎました。Wave 1 から始めます」と 1 行報告し、R4 へ。
+   ```
+
+3. `working` が返ったら「executor `<topic>-root` に引き継ぎました。この pane は executor が閉じます」
+   と 1 行出して turn を終える。**それ以上は何もしない。**
+   `blocked` / `agent_prompt_stalled` / timeout なら `herdr agent read <topic>-root --source visible --lines 30`
+   で pane を読んで user に報告し、planner は残る。
+
+### R4-0. executor の入口
+
+1. 引き継ぎ文の `<repo>` / `<topic>` / spec / plan / waves を控え、planner の pane を閉じる:
+   `herdr pane close <planner_pane>`。
+2. user に 1 行報告する（引き継ぎ文の指示どおり）。
+3. spec と plan を読む。R1〜R3 はやり直さない。
+4. R4 へ。`<root>` は自分（`ListAgents` では `<topic>/root`）。
+
 ### R4. wave N の worker を起動
 
 **plan 全体を 1 つの worker に渡さない。** worker は wave ごとに使い捨てで、
@@ -208,7 +263,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
 
    （pi では `--kind pi` にし、`--model` / `--permission-mode auto` は付けず session 継承。`--permission-mode auto` 相当の有無は要確認）
 
-   herdr の agent 名だけは `[a-z][a-z0-9_-]{0,31}` 制限があるので `<topic>-w<N>`（`<topic>` は 28 文字以内）。
+   herdr の agent 名だけは `[a-z][a-z0-9_-]{0,31}` 制限があるので `<topic>-w<N>`（`<topic>` は 27 文字以内）。
 4. `herdr agent prompt <topic>-w<N> "<task>"` で送る。**`--wait` を付けない**。待っている間は worker の質問に答えられない:
 
    ```text
@@ -228,7 +283,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
 
 root は実装に関与しないが、**worker の問い合わせ窓口として起きている**。
 
-- 質問が来たら spec / plan / これまでの会話から答える。コードを読みに行かない（pi では worker の `ask` に対し `intercom({ action: "reply" })` で返す）。
+- 質問が来たら spec / plan から答える。executor は R1/R2 の会話を持たないので、書かれていなければ user に聞く。コードを読みに行かない（pi では worker の `ask` に対し `intercom({ action: "reply" })` で返す）。
 - 判断材料が無いときだけ `AskUserQuestion`（pi では質問ツール）で user に聞き、答えを worker に返す。
 - user から状況を聞かれたら `herdr agent read <topic>-w<N> --source recent-unwrapped --lines 60`。
 - worker から DONE 報告が来たら R6 へ。BLOCKED なら内容を見て答えるか user に聞く。
@@ -398,6 +453,10 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | 思考 | 現実 |
 | --- | --- |
 | （root）「plan 全体を worker に渡して待つ」 | wave ごとに worker を使い捨てる。渡すのは当該 wave だけ |
+| （planner）「R4 以降も自分で続ける」 | R3-H で executor に渡す。planner の model を R4 以降に使わない |
+| （planner）「prompt を送ったら閉じてよい」 | `working` を見てから。blocked なら残って user に報告 |
+| （executor）「planner に質問する」 | planner は居ない。spec / plan に無ければ user へ |
+| （executor）「planner の pane を残しておく」 | 最初に閉じる。root が 2 つ居る状態を作らない |
 | （root）`agent prompt --wait` で待つ | 待つと worker の質問に答えられない。`--wait` を付けない |
 | （root）「worker を root の下の workspace としてネストさせる」 | worker は同一 workspace の pane。`herdr worktree open` は root が linked worktree 側に居ると `linked_worktree_source` で失敗する |
 | （root）「review と PR も worker に任せる」 | worker は実装と push まで。統合は root（R6） |
