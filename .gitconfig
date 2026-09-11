@@ -48,12 +48,12 @@
 	root = ~/Documents/ghq
 [credential "https://github.com"]
 	username = taiki-kuraishi
-	helper =
-	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user taiki-kuraishi)\"; }; f"
+	helper = 
+	helper = !/home/user/.nix-profile/bin/.gh-wrapped auth git-credential
 [credential "https://gist.github.com"]
 	username = taiki-kuraishi
-	helper =
-	helper = "!f() { test \"$1\" = get && printf 'password=%s\\n' \"$(gh auth token --user taiki-kuraishi)\"; }; f"
+	helper = 
+	helper = !/home/user/.nix-profile/bin/.gh-wrapped auth git-credential
 [include]
 	path = ~/.gitconfig-work-orgs
 [include]
