@@ -1,6 +1,6 @@
 ---
 name: orchestrating-development
-description: Use when the user asks to build, implement, refactor, or fix something in a git repo that needs a spec and plan before code — 「〜を実装して」「〜機能を作りたい」「issue #N をやって」「リファクタして」, "build X", "implement this". Also use when a session was started as a worker for a plan (「worker mode で」), when the user reports a hunk review is done (「レビュー終わった」), or asks to clean up a finished handoff (「片付けて」). Not for questions, spikes, or one-line fixes with no plan. Works in both Claude Code and pi sessions; tool names that differ between the two map per the correspondence table below (`ClaudeではX / piではY` の読み替えで両対応).
+description: Use when the user asks to build, implement, refactor, or fix something in a git repo that needs a spec and plan before code — 「〜を実装して」「〜機能を作りたい」「issue #N をやって」「リファクタして」, "build X", "implement this". Also use when a session was started as a worker for a plan (「worker mode で」), when the user reports a hunk review is done (「レビュー終わった」). For tearing down a finished handoff (workspaces, worktrees, branches, /tmp), use cleanup-after-development. Not for questions, spikes, or one-line fixes with no plan. Works in both Claude Code and pi sessions; tool names that differ between the two map per the correspondence table below (`ClaudeではX / piではY` の読み替えで両対応).
 ---
 
 # Orchestrating development
@@ -309,7 +309,7 @@ gh pr list --state all --limit 100 --json number,headRefName,state \
 ```
 
 残っていれば、`MERGED` を確認できたものだけ `herdr-worktree-handoff` の cleanup 手順で消す
-（workspace close → `wt remove <path> --foreground` → `git branch -D`）。未 merge のものは止まって user に聞く。
+（workspace close → `wt remove <path> --foreground` → `git branch -d`）。未 merge のものは止まって user に聞く。
 
 ## worker の手順
 

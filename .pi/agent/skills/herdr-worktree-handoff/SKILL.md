@@ -1,6 +1,6 @@
 ---
 name: herdr-worktree-handoff
-description: Use when the user asks to hand a task off to another Claude Code agent in its own git worktree that they can watch from Herdr — "別 worktree に切り出して", "herdr で動かして", "spawn a worktree agent", "delegate this to a new session in herdr". Also use when `herdr agent start` returns agent_not_ready, or `herdr agent prompt --wait` comes back blocked. Also use when the delegated work is done and the user wants the Herdr workspace, worktree, and branch removed (「片付けて」「消して」, "clean up the worktree").
+description: Use when the user asks to hand a task off to another Claude Code agent in its own git worktree that they can watch from Herdr — "別 worktree に切り出して", "herdr で動かして", "spawn a worktree agent", "delegate this to a new session in herdr". Also use when `herdr agent start` returns agent_not_ready, or `herdr agent prompt --wait` comes back blocked. For tearing the workspace, worktree, and branch down afterwards, use cleanup-after-development.
 ---
 
 # Handing a task off to a Herdr worktree agent
@@ -98,3 +98,5 @@ git -C <repo> worktree list && git -C <repo> branch    # confirm both are gone
 
 `-D` and `-f` are irreversible. Add them only when the user said the branch
 or the changes can go; otherwise stop at the `wt remove` error and ask.
+
+片付け全体（`/tmp` の掃除を含む）は `cleanup-after-development` が担う。ここはそのうち workspace / worktree / branch の部分。
