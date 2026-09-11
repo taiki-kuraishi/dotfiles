@@ -144,6 +144,8 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 - 1 wave = 1 PR = 1 worker session。各 wave が単独で CI 緑になる境界で切る。切れないなら理由を plan に書く。
   wave 内の task 数に上限は無い（並列に出せる）が、wave をまたぐ作業を 1 つの worker に渡すことはしない。
 - task の切り方・粒度・wave 分けは root が spec から決め、**user に確認せず plan 全体を書く**。質は下の plan review で担保する。user に聞くのは spec に無い要件の判断だけで、task 構成の確認には使わない。
+- 依存の無い task は同じ wave にまとめ、wave 数は最小にする。wave を分ける理由は「依存がある」か「単独で CI 緑にできない」だけ。
+- 同一 wave の task は §W1 の並列条件（`Files:` が互いに素、Produces/Consumes 無し、lockfile・schema・migration・生成物を共有しない）を満たす切り方を優先する。満たせない task は plan にその旨を書く。
 - plan 完成後、opus の reviewer に `plan-document-reviewer-prompt.md` で spec 整合を（pi では reviewer＋同等プロンプト。パスは要確認）、
   もう 1 体に **repo docs 整合**（`AGENTS.md` と `CLAUDE.md` の全階層、`.claude/rules/**`、README、`docs/**`。Claude / pi 共通）を見せる。
   ずれは user と相談して plan か docs のどちらを直すか決める。
