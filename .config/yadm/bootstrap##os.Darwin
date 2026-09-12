@@ -27,6 +27,7 @@ fi
 
 if command -v bunx >/dev/null 2>&1; then
   bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code
+  bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent pi
   bunx skills add mattpocock/skills --skill handoff wait-what writing-for-agents -g -y --agent claude-code
   bunx skills add mattpocock/skills --skill handoff wait-what writing-for-agents -g -y --agent pi
   bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
