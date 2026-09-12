@@ -20,6 +20,9 @@
     "npm:@aliou/pi-processes",
     "npm:pi-claude-code-provider"
   ],
+  "skills": [
+    "!/home/user/.agents/skills/**"
+  ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "collapseChangelog": true,
