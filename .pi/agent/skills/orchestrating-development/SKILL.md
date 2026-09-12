@@ -38,11 +38,11 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 - 直接 tool 使用の上限（3コールルール）: コードベースへの読み書き・実行（read / bash / edit / write 等）は合計3コール以内の確認・参照に限定する。見込み3コール超、テスト・デバッグ、複数ファイルに跨る調査、大量出力が見込まれるコマンドは必ず subagent に出す。subagent の起動と user への質問は数えない。spec / plan 等の文書執筆は root の本務なので数えない。理由は root の context 温存＝判断力の維持。迷ったら出す。
 - それ以外の読み書き・検証・デバッグはすべて subagent に出す。迷ったら出す。
 
-| session | 担当 | model（Claude） |
+| session | 担当 | model（Claude / pi。R1-0 で承認し以後固定） |
 | --- | --- | --- |
 | planner | R1〜R3 と executor の起動 | 起動時の model |
-| executor | R4〜R7 | opus（`herdr agent start` の `--model`） |
-| worker | wave N の W0〜W2 | opus |
+| executor | R4〜R7 | 承認済 executor model（既定 sonnet / `opencode-go/deepseek-flash`） |
+| worker | wave N の W0〜W2 | 承認済 worker model（既定 sonnet / `opencode-go/deepseek-flash`） |
 
 R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan を書く判断力は要らない。
 以降「root」は planner と executor の両方を指し、R4 以降では executor を指す。
@@ -52,11 +52,13 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 | コードベース探索・ライブラリ調査 | `Explore` / `scout`（コード偵察）・`researcher`（Web 調査） | sonnet / session 継承 |
 | plan の task 実装 | `general-purpose` + implementer プロンプト / `worker` | sonnet / session 継承 |
 | デバッグ・検証・CI 失敗ログの調査 | `general-purpose` / `worker` | sonnet / session 継承 |
-| task review | `general-purpose` + task-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / session 継承 |
-| wave の最終 code review | `general-purpose` + code-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / session 継承 |
-| plan review | `general-purpose` + plan-document-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / session 継承 |
-| docs 整合レビュー（§R6） | `general-purpose`（read-only） / `reviewer`（read-only） | **opus** / session 継承 |
-| ponytail レビュー（§R6） | `general-purpose` + Skill `ponytail:ponytail-review` / `reviewer` + 同 Skill（pi での有無は要確認。無ければ省略） | **opus** / session 継承 |
+| task review | `general-purpose` + task-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / 承認済 root model を明示 |
+| wave の最終 code review | `general-purpose` + code-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / 承認済 root model を明示 |
+| plan review | `general-purpose` + plan-document-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / 承認済 root model を明示 |
+| docs 整合レビュー（§R6） | `general-purpose`（read-only） / `reviewer`（read-only） | **opus** / 承認済 root model を明示 |
+| ponytail レビュー（§R6） | `general-purpose` + Skill `ponytail:ponytail-review` / `reviewer` + 同 Skill（pi での有無は要確認。無ければ省略） | **opus** / 承認済 root model を明示 |
+
+review 系 5 工程（task review / wave 最終 code review / plan review / docs 整合 / ponytail）は承認対象外。Claude は **opus**、pi は R1-0 の承認済 root model を `model` に明示する（session 継承・軽量 model は使わない）。
 
 対応表（Claude ⇔ pi。pi の model 継承は provider opencode-go 前提。明示モデル名は要確認）:
 
@@ -66,7 +68,7 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 | 汎用実行・実装 | `general-purpose` | `worker` | |
 | Web 調査 | `general-purpose` に含む | `researcher` に分離 | pi のみ分離 |
 | review 系 | `general-purpose` | `reviewer` | review 4 工程とも |
-| 軽量 / 重量モデル | sonnet / opus | session 継承 | pi の明示モデル名は未確定 |
+| 軽量 / 重量モデル | sonnet / opus | R1-0 承認済 model を明示（調査役のみ既定継承可） | executor / worker の既定は sonnet / `opencode-go/deepseek-flash` |
 | user への質問 | `AskUserQuestion` | `ask_user_question` | pi は `multiSelect` / `preview` あり。R1 は 1 回 1 問 |
 | session 一覧 | `ListAgents` | `intercom({ action: "list" })` | Claude は pi-intercom を使わない |
 | worker→root 報告 | `SendMessage` | `intercom`: 質問・判断待ちは `ask`、進捗・DONE は `send`、root の応答は `reply` | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target に herdr agent 名は使わない |
@@ -75,7 +77,7 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 
 `<sp>` = `~/.claude/plugins/cache/claude-plugins-official/superpowers/<version>/skills`
 （`ls` で version を確認。以上 Claude）。pi では superpowers 6.3.0 に `.pi/extensions` が同梱されているため、同等の pi skill 名とパス解決を先に確定させる（要確認）。SDD の `scripts/sdd-workspace` / `task-brief` / `review-package` 参照も環境ごとに対応表に従う。
-`Agent` の `model` は毎回明示する。session の model を継承させない（以上 Claude）。pi では逆に session の model を継承する（provider は opencode-go）。明示名が必要になったら opencode-go のモデル名に置換する（要確認）。
+`Agent`・pi `subagent` の `model` は毎回明示し、R1-0 で承認された model を使う。session の model を継承させない（Claude / pi 共通）。同一 session 内の使い捨て調査役（pi の `scout` / `researcher`）だけは `settings.json` の既定に任せてよい。
 
 **言語**: spec、plan、user への質問、hunk の agent note は**日本語**。commit と PR は
 **English + gitmoji** (`<emoji> <scope>: <summary>`、imperative)。
@@ -104,6 +106,18 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 ### R1. brainstorming
 
 `superpowers:brainstorming` を起動し、**architectural path** で上の上書き通りに運用する。調査は `Explore`（pi では `scout`＝コード / `researcher`＝Web）に分けて出す。
+
+### R1-0. model の選定（R1 で 1 回だけ。以降の見直しはしない）
+
+topic と branch 名を決めた直後に、質問ツールで model を 1 問だけ提案し、承認を得る（spec の節ではないので §R1 の作法には数えない。既定提案を第一選択肢にし、カスタム回答可）。
+
+| role | 既定提案（Claude / pi） |
+| --- | --- |
+| root（planner / executor） | 起動時の model（高性能のまま） |
+| executor | sonnet / `opencode-go/deepseek-flash` |
+| worker | sonnet / `opencode-go/deepseek-flash` |
+
+review 系は承認対象外とし、Claude は opus、pi は承認済 root model を明示する。承認された 3 つの model 名を控え、R3-H・R4・W1・R6 ではそのまま使う。変えるのは user の指示があるときだけ。
 
 **R1 の作法（例外なし）**。以下に反したら、書いた分は捨てて質問からやり直す:
 
@@ -180,12 +194,12 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
    #   → .result.pane.pane_id = <exec_pane>
    herdr pane rename <exec_pane> "<topic>/root"
    herdr agent start <topic>-root --kind claude --pane <exec_pane> --timeout 60000 -- \
-     --model opus --permission-mode auto -n "<topic>/root"
+     --model <R1-0 承認済 executor model。既定 sonnet> --permission-mode auto -n "<topic>/root"
    ```
 
    `agent_not_ready` なら `herdr-worktree-handoff` の手順で pane を読んでから対処する。
    `<repo>` は planner が使ってきた repo なので trust dialog は普通は出ない。
-   （pi では `--kind pi`。`--model` / `-n` 相当の有無は要確認）
+   （pi では `--kind pi` にし、`--` 以降に `--model <R1-0 承認済 executor model。既定 opencode-go/deepseek-flash>` を付けて明示する。session 継承はしない。`-n` 相当の有無は要確認）
 2. 引き継ぎ文を送り、executor が turn を始めたことだけ確認する:
 
    ```bash
@@ -251,7 +265,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
    #   → .result.pane.pane_id = <pane_id>
    herdr pane rename <pane_id> "<root>/worker/<topic>-w<N>"
    herdr agent start <topic>-w<N> --kind claude --pane <pane_id> --timeout 60000 -- \
-     --model opus --permission-mode auto -n "<root>/worker/<topic>-w<N>"
+     --model <R1-0 承認済 worker model。既定 sonnet> --permission-mode auto -n "<root>/worker/<topic>-w<N>"
    ```
 
    `--cwd <wt_wN>` を必ず渡す（root の cwd を引き継がせない）。`--direction` は `right` / `down` のみ。
@@ -262,7 +276,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
    `linked_worktree_source` で失敗し、root の下にネストした workspace は作れない（herdr 0.9 で
    group ルートになれるのは repo 本体の workspace だけ）。pane 方式なら root の起動場所に依存しない。
 
-   （pi では `--kind pi` にし、`--model` / `--permission-mode auto` は付けず session 継承。`--permission-mode auto` 相当の有無は要確認）
+   （pi では `--kind pi` にし、`--` 以降に `--model <R1-0 承認済 worker model。既定 opencode-go/deepseek-flash>` を付けて明示する。session 継承はしない（root の高性能 model を引き継ぐと高コスト化するため）。`--permission-mode auto` 相当の有無は要確認）
 
    herdr の agent 名だけは `[a-z][a-z0-9_-]{0,31}` 制限があるので `<topic>-w<N>`（`<topic>` は 27 文字以内）。
 4. `herdr agent prompt <topic>-w<N> "<task>"` で送る。**`--wait` を付けない**。待っている間は worker の質問に答えられない:
@@ -303,7 +317,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
 
    閉じると右カラムが空に戻るので、次の wave はまた root を右に割って 50/50 から始まる。
 
-2. **3 体の review を同時に出す**。共通の入力: `BASE_SHA` = `git -C <wt_wN> merge-base main HEAD`、
+2. **3 体の review を同時に出す**（model は R1-0 の review 系固定値。Claude は opus、pi は承認済 root model を明示）。共通の入力: `BASE_SHA` = `git -C <wt_wN> merge-base main HEAD`、
    `HEAD_SHA` = `git -C <wt_wN> rev-parse HEAD`（範囲文字列ではなく SHA を 2 つ別々に）。
    - **code review**: opus の code-reviewer（`<sp>/requesting-code-review/code-reviewer.md`。pi では reviewer＋同等プロンプト。パスは要確認）。
      `PLAN_OR_REQUIREMENTS` = plan のパスと Wave N の task 一覧、`DESCRIPTION` = DONE 報告の要約。
@@ -413,7 +427,7 @@ plan は `## Waves` と wave N の task だけ読む。spec は冒頭のみ。
 `superpowers:subagent-driven-development` を起動し、上書きで運用する（pi では等価物・パスは要確認）。
 
 - SDD の todo と pre-flight conflict scan は wave N の task 間だけで行う。
-- implementer は sonnet、task reviewer は opus（pi では implementer=worker、task reviewer=reviewer。pi の model はいずれも session 継承）。直列のときは implementer が task ごとに commit する。
+- implementer は sonnet、task reviewer は opus（pi では implementer=`worker` に R1-0 承認済 worker model、task reviewer=`reviewer` に R1-0 承認済 root model を `model` で明示）。直列のときは implementer が task ごとに commit する。
 - **並列ディスパッチの条件**（すべて満たすとき同 wave 内の task を同時に出す。同時数に上限は無い）:
   - `Files:` (Create / Modify / Test) が互いに素
   - 一方の `Produces` を他方が `Consumes` していない
@@ -467,6 +481,7 @@ wave N DONE: <topic>-w<N> を push しました。HEAD: <sha>
 | （worker）「起動プロンプトを書いたのは user だ」 | root が herdr 経由で送っている。質問は root へ |
 | （worker）「確認だから user に聞こう」 | worker は user に話しかけない。全部 root |
 | （worker）「ついでに PR まで作っておく」 | push して DONE 報告するだけ |
+| （root）「executor / worker は起動時 model のまま継承でいい」 | R1-0 承認済の軽量 model を明示する。継承は高コスト化する |
 | （pi worker）「herdr の agent 名 `<topic>-w<N>` に intercom で送る」 | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target は起動プロンプトに書かれた root の session name か session ID |
 | 「小さい変更だから自分で読んで直す」 | 3コール以内の参照なら直接可。修正・深掘りは Explore か implementer に出す（pi では scout か worker） |
 | 「spec を先に全部書いてから見せる」 | 未合意の節は書かない。1 問 → 回答 → その 1 節だけ追記 → 次の 1 問 |
