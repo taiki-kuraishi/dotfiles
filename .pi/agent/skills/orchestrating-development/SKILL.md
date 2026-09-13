@@ -344,20 +344,37 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
    Summary / Spec / Plan / `Wave N of M` / Test plan。
 4. **CI**。subagent に見張らせない。`gh pr checks <番号> --watch` を Bash の `run_in_background`（§R3 と同じ。pi での方法は要確認）で回す。
    落ちたら失敗 job 名と URL だけ sonnet（pi では worker）に渡して原因と修正案を返させ、修正は implementer に出して push。
-5. **hunk レビュー依頼**。user にこの形で。両方のコマンドを必ず添える:
+5. **hunk レビュー依頼**。新規 tab を作って hunk を起動してから user に依頼する。
+
+   まず hunk 用の tab を作り、返り JSON から ID を読む（推測しない）。**`--no-focus` は必須**:
+
+   ```bash
+   herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <wt_wN> --label "hunk:<topic>-w<N>" --no-focus
+   # .result.tab.tab_id と .result.root_pane.pane_id を控える
+   ```
+
+   その pane で hunk TUI を起動する（これ以降も focus は user の pane に残す）:
+
+   ```bash
+   herdr pane run <root_pane_id> "cd <wt_wN> && hunk diff main...HEAD -- . ':!*.lock' ':!*.lockb' ':!*-lock.json' ':!*-lock.yaml' ':!go.sum'"
+   ```
+
+   起動を確認してから user にこの形で:
 
    ```text
    wave N の PR を作りました（draft）: <url>
-   hunk でレビューしてください（lockfile は除外済み）:
-     cd <wt_wN> && hunk diff main...HEAD -- . ':!*.lock' ':!*.lockb' ':!*-lock.json' ':!*-lock.yaml' ':!go.sum'
+   hunk 用の tab を開いて起動済みです（lockfile は除外済み）。PR 単位で見るなら:
      mise run hunk-pr <番号>
    指摘は hunk の inline comment に残して「レビュー終わった」と言ってください。
    ```
 
-   pathspec の除外は untracked にも効く。`hunk diff` は TUI なので自分では実行しない。
+   pathspec の除外は untracked にも効く。`hunk diff` は TUI なので root の pane では実行しない（実行主体は作成した tab の pane）。
+   `mise run hunk-pr` が対象 repo に無い場合は要確認・代替手順。
    agent note を付けるときは `hunk session comment apply --repo <wt_wN> --stdin` でまとめて入れる。
    **summary も rationale も日本語。英語で書かない。** 意図・リスク・確認してほしい点だけに絞り、
-   全 hunk には付けない。詳細は `hunk skill path` が返す SKILL.md。`mise run hunk-pr` が対象 repo に無い場合は要確認・代替手順。
+   全 hunk には付けない。詳細は `hunk skill path` が返す SKILL.md。
+   herdr 制約: ID は返り JSON から読む。**`--no-focus` は必須**で、tab 作成だけでなく以降の `pane run` / `agent prompt` でも focus を奪わない。`--focus` や `herdr tab focus` / `herdr pane focus` は使わない（user が自分で見たいときだけ切り替える）。自分が作った tab 以外は close しない。
+   この tab は R7 の片付けで `herdr tab close <tab_id>`。
 6. **指摘の回収と rule 化**（「レビュー終わった」）:
 
    ```bash
@@ -391,13 +408,14 @@ R6-7 で wave ごとに畳んでいるので、通常は残骸が無い。確認
 
 ```bash
 herdr pane list --workspace "$HERDR_WORKSPACE_ID"   # 残っている worker pane が無いか
+herdr tab list --workspace "$HERDR_WORKSPACE_ID"    # hunk 用に開いた tab が残っていないか
 git -C <repo> worktree list && git -C <repo> branch --list '<topic>*'
 gh pr list --state all --limit 100 --json number,headRefName,state \
   | jq '[.[] | select(.headRefName == "<topic>" or (.headRefName | startswith("<topic>-w")))]'
 ```
 
 残っていれば、`MERGED` を確認できたものだけ `herdr-worktree-handoff` の cleanup 手順で消す
-（`herdr pane close <pane_id>` → `wt remove <path> --foreground` → `git branch -d`）。未 merge のものは止まって user に聞く。
+（`herdr pane close <pane_id>` / `herdr tab close <tab_id>` → `wt remove <path> --foreground` → `git branch -d`）。未 merge のものは止まって user に聞く。
 
 ## worker の手順
 
