@@ -30,6 +30,7 @@
       tmux
       ghq
       hunk
+      tuicr
       docker
       kubectl
       gnumake
