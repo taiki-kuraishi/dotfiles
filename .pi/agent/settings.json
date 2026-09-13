@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.85.1",
   "theme": "dark",
   "defaultProvider": "opencode-go",
-  "defaultModel": "deepseek-flash",
+  "defaultModel": "deepseek-v4.1-flash",
   "defaultThinkingLevel": "max",
   "packages": [
     "npm:@hypabolic/pi-hypa",
@@ -18,7 +18,8 @@
     "npm:pi-intercom",
     "git:github.com/obra/superpowers",
     "npm:@aliou/pi-processes",
-    "npm:pi-claude-code-provider"
+    "npm:pi-claude-code-provider",
+    "https://github.com/ayghri/i-have-adhd"
   ],
   "skills": [
     "!/home/user/.agents/skills/**"
@@ -70,19 +71,19 @@
         "disabled": true
       },
       "scout": {
-        "model": "opencode-go/deepseek-flash",
+        "model": "opencode-go/deepseek-v4.1-flash",
         "thinking": "low"
       },
       "researcher": {
-        "model": "opencode-go/deepseek-flash",
+        "model": "opencode-go/deepseek-v4.1-flash",
         "thinking": "high"
       },
       "worker": {
-        "model": "opencode-go/deepseek-flash",
+        "model": "opencode-go/deepseek-v4.1-flash",
         "thinking": "high"
       },
       "reviewer": {
-        "model": "opencode-go/deepseek-flash",
+        "model": "opencode-go/deepseek-v4.1-flash",
         "thinking": "high"
       }
     }

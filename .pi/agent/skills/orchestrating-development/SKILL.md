@@ -41,8 +41,8 @@ superpowers 本文と矛盾する箇所は**このスキルが優先**する
 | session | 担当 | model（Claude / pi。R1-0 で承認し以後固定） |
 | --- | --- | --- |
 | planner | R1〜R3 と executor の起動 | 起動時の model |
-| executor | R4〜R7 | 承認済 executor model（既定 sonnet / `opencode-go/deepseek-flash`） |
-| worker | wave N の W0〜W2 | 承認済 worker model（既定 sonnet / `opencode-go/deepseek-flash`） |
+| executor | R4〜R7 | 承認済 executor model（既定 sonnet / `opencode-go/deepseek-v4.1-flash`） |
+| worker | wave N の W0〜W2 | 承認済 worker model（既定 sonnet / `opencode-go/deepseek-v4.1-flash`） |
 
 R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan を書く判断力は要らない。
 以降「root」は planner と executor の両方を指し、R4 以降では executor を指す。
@@ -68,7 +68,7 @@ review 系 5 工程（task review / wave 最終 code review / plan review / docs
 | 汎用実行・実装 | `general-purpose` | `worker` | |
 | Web 調査 | `general-purpose` に含む | `researcher` に分離 | pi のみ分離 |
 | review 系 | `general-purpose` | `reviewer` | review 4 工程とも |
-| 軽量 / 重量モデル | sonnet / opus | R1-0 承認済 model を明示（調査役のみ既定継承可） | executor / worker の既定は sonnet / `opencode-go/deepseek-flash` |
+| 軽量 / 重量モデル | sonnet / opus | R1-0 承認済 model を明示（調査役のみ既定継承可） | executor / worker の既定は sonnet / `opencode-go/deepseek-v4.1-flash` |
 | user への質問 | `AskUserQuestion` | `ask_user_question` | pi は `multiSelect` / `preview` あり。R1 は 1 回 1 問 |
 | session 一覧 | `ListAgents` | `intercom({ action: "list" })` | Claude は pi-intercom を使わない |
 | worker→root 報告 | `SendMessage` | `intercom`: 質問・判断待ちは `ask`、進捗・DONE は `send`、root の応答は `reply` | herdr の agent/pane 名と pi intercom の session 名は別の名前空間。target に herdr agent 名は使わない |
@@ -114,8 +114,8 @@ topic と branch 名を決めた直後に、質問ツールで model を 1 問�
 | role | 既定提案（Claude / pi） |
 | --- | --- |
 | root（planner / executor） | 起動時の model（高性能のまま） |
-| executor | sonnet / `opencode-go/deepseek-flash` |
-| worker | sonnet / `opencode-go/deepseek-flash` |
+| executor | sonnet / `opencode-go/deepseek-v4.1-flash` |
+| worker | sonnet / `opencode-go/deepseek-v4.1-flash` |
 
 review 系は承認対象外とし、Claude は opus、pi は承認済 root model を明示する。承認された 3 つの model 名を控え、R3-H・R4・W1・R6 ではそのまま使う。変えるのは user の指示があるときだけ。
 
@@ -199,7 +199,7 @@ merge したら `<wt>` は用済み。`wt -C <repo> remove <wt> --foreground` �
 
    `agent_not_ready` なら `herdr-worktree-handoff` の手順で pane を読んでから対処する。
    `<repo>` は planner が使ってきた repo なので trust dialog は普通は出ない。
-   （pi では `--kind pi` にし、`--` 以降に `--model <R1-0 承認済 executor model。既定 opencode-go/deepseek-flash>` を付けて明示する。session 継承はしない。`-n` 相当の有無は要確認）
+   （pi では `--kind pi` にし、`--` 以降に `--model <R1-0 承認済 executor model。既定 opencode-go/deepseek-v4.1-flash>` を付けて明示する。session 継承はしない。`-n` 相当の有無は要確認）
 2. 引き継ぎ文を送り、executor が turn を始めたことだけ確認する:
 
    ```bash
@@ -276,7 +276,7 @@ pi での小規模運用では、user の指示があれば worktree・branch �
    `linked_worktree_source` で失敗し、root の下にネストした workspace は作れない（herdr 0.9 で
    group ルートになれるのは repo 本体の workspace だけ）。pane 方式なら root の起動場所に依存しない。
 
-   （pi では `--kind pi` にし、`--` 以降に `--model <R1-0 承認済 worker model。既定 opencode-go/deepseek-flash>` を付けて明示する。session 継承はしない（root の高性能 model を引き継ぐと高コスト化するため）。`--permission-mode auto` 相当の有無は要確認）
+   （pi では `--kind pi` にし、`--` 以降に `--model <R1-0 承認済 worker model。既定 opencode-go/deepseek-v4.1-flash>` を付けて明示する。session 継承はしない（root の高性能 model を引き継ぐと高コスト化するため）。`--permission-mode auto` 相当の有無は要確認）
 
    herdr の agent 名だけは `[a-z][a-z0-9_-]{0,31}` 制限があるので `<topic>-w<N>`（`<topic>` は 27 文字以内）。
 4. `herdr agent prompt <topic>-w<N> "<task>"` で送る。**`--wait` を付けない**。待っている間は worker の質問に答えられない:
