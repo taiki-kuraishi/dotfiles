@@ -56,7 +56,7 @@ R4 以降の root の仕事は報告の受理と spec 照合で、spec / plan �
 | wave の最終 code review | `general-purpose` + code-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / 承認済 root model を明示 |
 | plan review | `general-purpose` + plan-document-reviewer プロンプト / `reviewer` + 同等プロンプト | **opus** / 承認済 root model を明示 |
 | docs 整合レビュー（§R6） | `general-purpose`（read-only） / `reviewer`（read-only） | **opus** / 承認済 root model を明示 |
-| ponytail レビュー（§R6） | `general-purpose` + Skill `ponytail:ponytail-review` / `reviewer` + 同 Skill（pi での有無は要確認。無ければ省略） | **opus** / 承認済 root model を明示 |
+| ponytail レビュー（§R6） | `general-purpose` + Skill `ponytail:ponytail-review` / `reviewer` + skill `ponytail-review`（実在確認済み） | **opus** / 承認済 root model を明示 |
 
 review 系 5 工程（task review / wave 最終 code review / plan review / docs 整合 / ponytail）は承認対象外。Claude は **opus**、pi は R1-0 の承認済 root model を `model` に明示する（session 継承・軽量 model は使わない）。
 
@@ -77,7 +77,7 @@ review 系 5 工程（task review / wave 最終 code review / plan review / docs
 
 `<sp>` = `~/.claude/plugins/cache/claude-plugins-official/superpowers/<version>/skills`
 （`ls` で version を確認。以上 Claude）。pi では superpowers 6.3.0 に `.pi/extensions` が同梱されているため、同等の pi skill 名とパス解決を先に確定させる（要確認）。SDD の `scripts/sdd-workspace` / `task-brief` / `review-package` 参照も環境ごとに対応表に従う。
-`Agent`・pi `subagent` の `model` は毎回明示し、R1-0 で承認された model を使う。session の model を継承させない（Claude / pi 共通）。同一 session 内の使い捨て調査役（pi の `scout` / `researcher`）だけは `settings.json` の既定に任せてよい。
+`Agent`・pi `subagent` の `model` は毎回明示し、R1-0 で承認された model を使う。session の model を継承させない（Claude / pi 共通）。同一 session 内の使い捨て調査役（pi の `scout` / `researcher`）だけは `settings.json` の既定に任せてよい。plan を持たない小タスク（`delegating-small-tasks`）は session model の継承でよい。ここは user 承認済み plan を実行する wave 単位の委譲なので、R1-0 で固定した model を明示する。
 
 **言語**: spec、plan、user への質問、hunk の agent note は**日本語**。commit と PR は
 **English + gitmoji** (`<emoji> <scope>: <summary>`、imperative)。
@@ -325,7 +325,7 @@ root は実装に関与しないが、**worker の問い合わせ窓口として
      対象 docs（§R2 と同じ。`AGENTS.md` と `CLAUDE.md` の全階層、`.claude/rules/**`、README、`docs/**`。superpowers は除く）。
      返させるもの（日本語）: `ファイル / docs の記述 / 実装の実態 / 直すべき側 (code|doc)` の表。
    - **ponytail review**: opus の general-purpose を 1 体、Skill ツールで `ponytail:ponytail-review` を
-     読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる（pi での有無は要確認。無ければこの review は省略）。
+     読ませてから `git diff BASE_SHA..HEAD_SHA` を見せる（pi では `reviewer` + skill `ponytail-review`。実在確認済み）。
 
    結果の扱い:
    - Critical / Important は sonnet の implementer（pi では worker）に `<wt_wN>` で直させて commit。再 review は 1 回だけ。
