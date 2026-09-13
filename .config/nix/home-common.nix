@@ -4,6 +4,19 @@
   lib,
   ...
 }:
+let
+  # gh は CLICOLOR_FORCE を尊重して JSON 出力にも ANSI を付けるため、パイプで JSON を読む
+  # ツール（tuicr / jq など）が壊れる。gh 自身には色を強制させない。
+  # symlinkJoin はキャッシュ済みバイナリを再利用する（overrideAttrs だと gh を再ビルドする）。
+  # 限界: 効くのは home.packages 経由の gh のみ。mise.toml の CLICOLOR_FORCE は残るため
+  # nix run / brew / コンテナ内の gh は色付きのまま。unset は gh の子プロセスにも波及する。
+  ghUncolored = pkgs.symlinkJoin {
+    name = "gh-uncolored";
+    paths = [ pkgs.gh ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = "wrapProgram $out/bin/gh --unset CLICOLOR_FORCE --unset FORCE_COLOR";
+  };
+in
 {
   home.stateVersion = "25.05";
 
@@ -17,7 +30,7 @@
       nixd
       cloudflared
       mise
-      gh
+      ghUncolored
       jq
       jaq
       less
