@@ -1,7 +1,7 @@
 ---
 name: sol-designer
 description: GPT-5.6 Sol (xhigh) + frontend-design skill で UI/フロントエンドのデザイン実装を行うエージェント
-model: opencode-go/deepseek-v4.1-flash
+model: openai-codex/gpt-5.6-sol
 thinking: xhigh
 tools: read, grep, find, ls, bash, edit, write
 systemPromptMode: replace

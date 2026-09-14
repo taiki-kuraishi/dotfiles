@@ -1,7 +1,7 @@
 ---
 name: glm-5.3-flash-designer
 description: GLM-5.3-Flash (max) + frontend-design skill で UI/フロントエンドのデザイン実装を行うエージェント
-model: opencode-go/deepseek-v4.1-flash
+model: opencode-go/glm-5.3-flash
 thinking: max
 tools: read, grep, find, ls, bash, edit, write
 systemPromptMode: replace
