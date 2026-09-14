@@ -33,8 +33,8 @@ fi
 
 mise x -- bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code
 mise x -- bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent pi
-mise x -- bunx skills add mattpocock/skills --skill handoff wait-what writing-for-agents -g -y --agent claude-code
-mise x -- bunx skills add mattpocock/skills --skill handoff wait-what writing-for-agents -g -y --agent pi
+mise x -- bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent claude-code
+mise x -- bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent pi
 mise x -- bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
 mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
 mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent pi
