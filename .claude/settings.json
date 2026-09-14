@@ -15,7 +15,8 @@
     "notion@claude-plugins-official": true,
     "cloudflare@claude-plugins-official": true,
     "worktrunk@worktrunk": true,
-    "figma@claude-plugins-official": true
+    "figma@claude-plugins-official": true,
+    "i-have-adhd@i-have-adhd": true
   },
   "extraKnownMarketplaces": {
     "ponytail": {
@@ -28,6 +29,12 @@
       "source": {
         "source": "github",
         "repo": "max-sixty/worktrunk"
+      }
+    },
+    "i-have-adhd": {
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
       }
     }
   },
