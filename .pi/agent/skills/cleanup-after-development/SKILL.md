@@ -1,6 +1,7 @@
 ---
 name: cleanup-after-development
 description: Use when development work driven by orchestrating-development, delegating-small-tasks, or a Herdr/worktree handoff is finished and the leftover artifacts need to go — 「片付けて」「消して」「後片付け」「cleanup」, "clean up the worktree", "remove the branch". Removes Herdr workspaces, git worktrees, branches, and /tmp scratch files, in that order. Does not touch docs/superpowers/**, .superpowers/sdd/**, ~/.pi/**, or git-ignored files. Use herdr-worktree-handoff for handing work OFF; use this skill to tear it down after the fact. Prefer this skill over herdr-worktree-handoff when the goal is teardown rather than handing work off.
+disable-model-invocation: true
 ---
 
 # 開発後の片付け

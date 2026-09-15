@@ -1,6 +1,7 @@
 ---
 name: yadm-dotfiles
 description: Use when touching this machine's home-directory config files (~/.claude, ~/.config, ~/.pi, shell rc files, editor config, .gitconfig) — committing, pushing, diffing, staging, inspecting, or working out which file backs a given tool's settings. They are tracked with yadm, not plain git, so `git` in $HOME targets the wrong repo.
+disable-model-invocation: true
 ---
 
 # yadm dotfiles

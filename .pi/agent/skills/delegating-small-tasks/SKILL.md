@@ -1,6 +1,7 @@
 ---
 name: delegating-small-tasks
 description: Use when the user asks for a small change, fix, investigation, or check in a repo that does not warrant a spec, a plan, or a separate worker session — 「ちょっと直して」「これ調べて」「テスト通して」「この関数を〜に変えて」, "quick fix", "look into X", "check whether Y works". Also use when the user says 「小さいタスク」「sub agent にやらせて」. Not for multi-wave features with a plan (use orchestrating-development). Works in both Claude Code and pi sessions; tool names that differ between the two map per the correspondence table below (`ClaudeではX / piではY` の読み替えで両対応).
+disable-model-invocation: true
 ---
 
 # Delegating small tasks

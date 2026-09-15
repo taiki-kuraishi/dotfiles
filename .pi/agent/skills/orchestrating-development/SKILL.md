@@ -1,6 +1,7 @@
 ---
 name: orchestrating-development
 description: Use when the user asks to build, implement, refactor, or fix something in a git repo that needs a spec and plan before code — 「〜を実装して」「〜機能を作りたい」「issue #N をやって」「リファクタして」, "build X", "implement this". Also use when a session was started as a worker for a plan (「worker mode で」), when the user reports a hunk review is done (「レビュー終わった」). For tearing down a finished handoff (workspaces, worktrees, branches, /tmp), use cleanup-after-development. Not for questions, spikes, or one-line fixes with no plan. Works in both Claude Code and pi sessions; tool names that differ between the two map per the correspondence table below (`ClaudeではX / piではY` の読み替えで両対応).
+disable-model-invocation: true
 ---
 
 # Orchestrating development

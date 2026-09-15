@@ -1,6 +1,7 @@
 ---
 name: herdr-worktree-handoff
 description: Use when the user asks to hand a task off to another Claude Code agent in its own git worktree that they can watch from Herdr — "別 worktree に切り出して", "herdr で動かして", "spawn a worktree agent", "delegate this to a new session in herdr". Also use when `herdr agent start` returns agent_not_ready, or `herdr agent prompt --wait` comes back blocked. For tearing the workspace, worktree, and branch down afterwards, use cleanup-after-development.
+disable-model-invocation: true
 ---
 
 # Handing a task off to a Herdr worktree agent
