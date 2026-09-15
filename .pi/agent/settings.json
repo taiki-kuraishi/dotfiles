@@ -19,7 +19,8 @@
     "git:github.com/obra/superpowers",
     "npm:@aliou/pi-processes",
     "npm:pi-claude-code-provider",
-    "https://github.com/ayghri/i-have-adhd"
+    "https://github.com/ayghri/i-have-adhd",
+    "npm:pi-compact-ui"
   ],
   "skills": [
     "!/home/user/.agents/skills/**"
