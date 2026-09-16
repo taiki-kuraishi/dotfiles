@@ -46,6 +46,7 @@ in
       tuicr
       docker
       kubectl
+      keycloak # provides bin/kcadm.sh, bin/kcreg.sh (no standalone CLI exists)
       gnumake
       pkg-config
       python3
