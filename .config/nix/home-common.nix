@@ -108,6 +108,7 @@ in
       command -v npm  >/dev/null && source <(npm completion)
       command -v pnpm >/dev/null && source <(pnpm completion zsh)
       command -v bun  >/dev/null && source <(bun completions)
+      command -v gh   >/dev/null && eval "$(command gh completion -s zsh)"
     ''
     + lib.optionalString pkgs.stdenv.isDarwin ''
 
