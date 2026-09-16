@@ -15,6 +15,12 @@ nix run github:nix-community/home-manager -- \
 
 export PATH="$HOME/.nix-profile/bin:$PATH"
 
+if command -v direnv >/dev/null 2>&1; then
+  for rc in "$HOME/Documents/ghq/github.com/.envrc" "$HOME/Documents/ghq/github.com/fancomi-interconnect/.envrc" "$HOME/Documents/ghq/github.com/fancs-product-mgmt/.envrc"; do
+    [ -f "$rc" ] && direnv allow "$rc"
+  done
+fi
+
 mise install --yes
 
 if [ -f "$HOME/.config/sops/age/keys.txt" ]; then
