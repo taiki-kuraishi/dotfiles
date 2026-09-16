@@ -92,6 +92,7 @@ in
       mtr = "mise tasks run";
       cat = "bat --paging=never";
       jq = "jaq";
+      keycloak = "kcadm.sh";
     }
     // lib.optionalAttrs pkgs.stdenv.isDarwin {
       tailscale = "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
