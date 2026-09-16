@@ -82,6 +82,8 @@ in
 
   programs.bat.enable = true;
 
+  programs.direnv.enable = true;
+
   programs.zsh = {
     enable = true;
 
@@ -106,17 +108,6 @@ in
       command -v npm  >/dev/null && source <(npm completion)
       command -v pnpm >/dev/null && source <(pnpm completion zsh)
       command -v bun  >/dev/null && source <(bun completions)
-
-      gh() {
-        local url org u
-        url=$(command git config --get remote.origin.url 2>/dev/null)
-        org=$(basename "$(dirname "$url")")
-        case "$org" in
-          fancomi-interconnect|a8-engineer|fancs-product-mgmt|t-kuraishi_fancs) u="t-kuraishi_fancs" ;;
-          *)                                                 u="taiki-kuraishi"   ;;
-        esac
-        GH_TOKEN="$(command gh auth token --user "$u" 2>/dev/null)" command gh "$@"
-      }
     ''
     + lib.optionalString pkgs.stdenv.isDarwin ''
 
@@ -124,12 +115,6 @@ in
 
       [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ] \
         && source <("/Applications/Tailscale.app/Contents/MacOS/Tailscale" completion zsh)
-    ''
-    + lib.optionalString pkgs.stdenv.isLinux ''
-
-      if command -v gh-app-token >/dev/null 2>&1; then
-        gh() { GH_TOKEN="$(gh-app-token)" command gh "$@"; }
-      fi
     '';
   };
 
