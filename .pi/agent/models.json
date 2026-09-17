@@ -14,8 +14,8 @@
           "name": "Union Alpha Free",
           "api": "anthropic-messages",
           "baseUrl": "https://opencode.ai/zen/go",
-          "reasoning": true,
-          "input": ["text"],
+          "reasoning": false,
+          "input": ["text", "image"],
           "cost": {
             "input": 0,
             "output": 0,
