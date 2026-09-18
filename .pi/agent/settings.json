@@ -11,7 +11,6 @@
     "npm:pi-subagents",
     "npm:@juicesharp/rpiv-todo",
     "git:github.com/DietrichGebert/ponytail",
-    "npm:@upstash/context7-pi",
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-usage",
     "npm:pi-intercom",
