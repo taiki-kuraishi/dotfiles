@@ -95,7 +95,7 @@ version = "0.11.4"
 backend = "cargo:shpool"
 
 [[tools."cargo:worktrunk"]]
-version = "0.77.0"
+version = "0.78.0"
 backend = "cargo:worktrunk"
 
 [[tools.deno]]
