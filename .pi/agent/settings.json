@@ -18,7 +18,8 @@
     "npm:@aliou/pi-processes",
     "npm:pi-claude-code-provider",
     "https://github.com/ayghri/i-have-adhd",
-    "npm:pi-compact-ui"
+    "npm:pi-compact-ui",
+    "npm:@quintinshaw/pi-dynamic-workflows"
   ],
   "skills": [
     "!/home/user/.agents/skills/**"
