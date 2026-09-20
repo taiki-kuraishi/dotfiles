@@ -33,4 +33,8 @@ if command -v bunx >/dev/null 2>&1; then
   bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
   bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
   bunx skills add herdrdev/herdr --skill herdr -g -y --agent pi
+  bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code
+  bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent pi
+  bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code
+  bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent pi
 fi
