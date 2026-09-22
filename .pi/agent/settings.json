@@ -14,7 +14,6 @@
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-usage",
     "npm:pi-intercom",
-    "git:github.com/obra/superpowers",
     "npm:@aliou/pi-processes",
     "npm:pi-claude-code-provider",
     "https://github.com/ayghri/i-have-adhd",
