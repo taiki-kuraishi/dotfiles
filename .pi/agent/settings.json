@@ -28,6 +28,11 @@
   "collapseChangelog": true,
   "outputPad": 0,
   "httpIdleTimeoutMs": 300000,
+  "retry": {
+    "provider": {
+      "timeoutMs": 1200000
+    }
+  },
   "warnings": {
     "anthropicExtraUsage": false
   },
