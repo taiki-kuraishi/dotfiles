@@ -49,6 +49,17 @@ mise x -- bunx skills add https://github.com/anthropics/skills --skill skill-cre
 mise x -- bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code
 mise x -- bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent pi
 
+# OMP (Oh My Pi) has no skills.sh agent definition, so share pi's skills via
+# symlinks. wait-what / writing-for-agents / handoff need no link: OMP already
+# loads them from ~/.agents/skills.
+mkdir -p "$HOME/.omp/agent/skills"
+for s in better-result typescript grilling frontend-design herdr skill-creator; do
+  dest="$HOME/.omp/agent/skills/$s"
+  if [ ! -e "$dest" ] && [ ! -L "$dest" ] && [ -d "$HOME/.pi/agent/skills/$s" ]; then
+    ln -s "../../../.pi/agent/skills/$s" "$dest"
+  fi
+done
+
 if ! command -v dockerd >/dev/null 2>&1 \
   && [ -d /run/systemd/system ] \
   && sudo -n true 2>/dev/null; then
