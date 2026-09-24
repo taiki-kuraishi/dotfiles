@@ -59,6 +59,9 @@ in
   home.sessionVariables = {
     SOPS_AGE_KEYFILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
     GOOGLE_CLOUD_PROJECT = "gen-lang-client-0186675745";
+    # Pin the Claude Code install; claude auto-update deletes the versioned
+    # binary pi-claude-code-provider has spawned (ENOENT / protocol drift).
+    DISABLE_AUTOUPDATER = "1";
   };
 
   home.sessionPath =
