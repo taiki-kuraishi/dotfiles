@@ -37,28 +37,12 @@ if [ ! -x "$HOME/.local/bin/pi" ]; then
   mise x -- npm install -g --prefix "$HOME/.local" --ignore-scripts @earendil-works/pi-coding-agent
 fi
 
-mise x -- bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code
-mise x -- bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent pi
-mise x -- bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent claude-code
-mise x -- bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent pi
-mise x -- bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
-mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
-mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent pi
-mise x -- bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code
-mise x -- bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent pi
-mise x -- bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code
-mise x -- bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent pi
-
-# OMP (Oh My Pi) has no skills.sh agent definition, so share pi's skills via
-# symlinks. wait-what / writing-for-agents / handoff need no link: OMP already
-# loads them from ~/.agents/skills.
-mkdir -p "$HOME/.omp/agent/skills"
-for s in better-result typescript grilling frontend-design herdr skill-creator; do
-  dest="$HOME/.omp/agent/skills/$s"
-  if [ ! -e "$dest" ] && [ ! -L "$dest" ] && [ -d "$HOME/.pi/agent/skills/$s" ]; then
-    ln -s "../../../.pi/agent/skills/$s" "$dest"
-  fi
-done
+mise x -- bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code universal
+mise x -- bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent claude-code universal
+mise x -- bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent universal
+mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code universal
+mise x -- bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code universal
+mise x -- bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code universal
 
 if ! command -v dockerd >/dev/null 2>&1 \
   && [ -d /run/systemd/system ] \

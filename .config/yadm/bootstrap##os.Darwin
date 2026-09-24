@@ -26,26 +26,10 @@ if [ ! -x "$HOME/.local/bin/pi" ] && command -v mise >/dev/null 2>&1; then
 fi
 
 if command -v bunx >/dev/null 2>&1; then
-  bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code
-  bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent pi
-  bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent claude-code
-  bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent pi
-  bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent pi
-  bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code
-  bunx skills add herdrdev/herdr --skill herdr -g -y --agent pi
-  bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code
-  bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent pi
-  bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code
-  bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent pi
+  bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code universal
+  bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent claude-code universal
+  bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent universal
+  bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code universal
+  bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code universal
+  bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code universal
 fi
-
-# OMP (Oh My Pi) has no skills.sh agent definition, so share pi's skills via
-# symlinks. wait-what / writing-for-agents / handoff need no link: OMP already
-# loads them from ~/.agents/skills.
-mkdir -p "$HOME/.omp/agent/skills"
-for s in better-result typescript grilling frontend-design herdr skill-creator; do
-  dest="$HOME/.omp/agent/skills/$s"
-  if [ ! -e "$dest" ] && [ ! -L "$dest" ] && [ -d "$HOME/.pi/agent/skills/$s" ]; then
-    ln -s "../../../.pi/agent/skills/$s" "$dest"
-  fi
-done
