@@ -1,0 +1,35 @@
+modelRoles:
+  smol: opencode-go/deepseek-v4.1-flash:low
+  vision: opencode-go/glm-5.3-flash:high
+  task: opencode-go/deepseek-v4.1-flash:high
+  default: anthropic/claude-opus-5-5:high
+symbolPreset: nerd
+composer:
+  shape: pi
+  tokenRate: true
+theme:
+  dark: titanium
+  light: light
+setupVersion: 2
+colorBlindMode: false
+statusLine:
+  preset: full
+  transparent: true
+  compactThinkingLevel: true
+terminal:
+  showProgress: true
+tui:
+  textSizing: true
+display:
+  showTokenUsage: true
+  showTurnTime: true
+  cacheMissMarker: true
+defaultThinkingLevel: max
+task:
+  disabledAgents:
+    - security-reviewer
+  agentModelOverrides:
+    reviewer: opencode-go/glm-5.3-flash
+    scout: opencode-go/glm-5.3-flash
+    sonic: opencode-go/glm-5.3-flash
+    task: opencode-go/glm-5.3-flash
