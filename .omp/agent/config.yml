@@ -46,10 +46,10 @@ task:
   disabledAgents:
     - security-reviewer
   agentModelOverrides:
-    reviewer: opencode-go/glm-5.3-flash
-    scout: opencode-go/glm-5.3-flash
-    sonic: opencode-go/glm-5.3-flash
-    task: opencode-go/glm-5.3-flash
+    reviewer: opencode-go/deepseek-v4.1-flash
+    scout: opencode-go/deepseek-v4.1-flash
+    sonic: opencode-go/deepseek-v4.1-flash
+    task: opencode-go/deepseek-v4.1-flash
 hideThinkingBlock: true
 dev:
   autoqaConsent: denied
