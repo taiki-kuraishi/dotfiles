@@ -13,7 +13,10 @@ theme:
 setupVersion: 2
 colorBlindMode: false
 statusLine:
-  preset: full
+  preset: custom
+  separator: powerline
+  leftSegments: [model, mode, path, git, pr, subagents]
+  rightSegments: [session_name, context_pct]
   transparent: true
   compactThinkingLevel: true
 terminal:
