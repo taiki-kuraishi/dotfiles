@@ -1,8 +1,8 @@
 modelRoles:
-  smol: opencode-go/deepseek-v4.1-flash:low
-  vision: opencode-go/glm-5.3-flash:high
-  task: opencode-go/deepseek-v4.1-flash:high
+  smol: opencode-go/glm-5.3-flash:low
+  task: opencode-go/glm-5.3-flash:max
   default: anthropic/claude-opus-5-5:high
+  vision: opencode-go/glm-5.3-flash:max
 symbolPreset: nerd
 composer:
   shape: pi
