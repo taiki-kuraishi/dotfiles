@@ -24,6 +24,7 @@ display:
   showTokenUsage: true
   showTurnTime: true
   cacheMissMarker: true
+  hideToolActivity: false
 defaultThinkingLevel: max
 task:
   disabledAgents:
@@ -33,3 +34,6 @@ task:
     scout: opencode-go/glm-5.3-flash
     sonic: opencode-go/glm-5.3-flash
     task: opencode-go/glm-5.3-flash
+hideThinkingBlock: true
+dev:
+  autoqaConsent: denied
