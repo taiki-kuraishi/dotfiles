@@ -37,12 +37,7 @@ if [ ! -x "$HOME/.local/bin/pi" ]; then
   mise x -- npm install -g --prefix "$HOME/.local" --ignore-scripts @earendil-works/pi-coding-agent
 fi
 
-mise x -- bunx skills add https://github.com/mattpocock/skills --skill grilling -g -y --agent claude-code universal
-mise x -- bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --agent claude-code universal
-mise x -- bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent universal
-mise x -- bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code universal
-mise x -- bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code universal
-mise x -- bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code universal
+mise -y -C "$HOME" run install-skills
 
 if ! command -v dockerd >/dev/null 2>&1 \
   && [ -d /run/systemd/system ] \
