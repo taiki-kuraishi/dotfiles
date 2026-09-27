@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  lib,
   ...
 }:
 let
@@ -20,41 +19,35 @@ in
 {
   home.stateVersion = "25.05";
 
-  home.packages =
-    with pkgs;
-    [
-      neovim
-      git
-      nixfmt
-      dprint
-      nixd
-      cloudflared
-      mise
-      ghUncolored
-      jq
-      jaq
-      less
-      glow
-      ripgrep
-      fd
-      fzf
-      lazygit
-      tree-sitter
-      tmux
-      ghq
-      hunk
-      tuicr
-      docker
-      kubectl
-      keycloak # provides bin/kcadm.sh, bin/kcreg.sh (no standalone CLI exists)
-      gnumake
-      pkg-config
-      python3
-    ]
-    ++ lib.optionals stdenv.isLinux [
-      gcc
-      fuse-overlayfs
-    ];
+  home.packages = with pkgs; [
+    neovim
+    git
+    nixfmt
+    dprint
+    nixd
+    cloudflared
+    mise
+    ghUncolored
+    jq
+    jaq
+    less
+    glow
+    ripgrep
+    fd
+    fzf
+    lazygit
+    tree-sitter
+    tmux
+    ghq
+    hunk
+    tuicr
+    docker
+    kubectl
+    keycloak # provides bin/kcadm.sh, bin/kcreg.sh (no standalone CLI exists)
+    gnumake
+    pkg-config
+    python3
+  ];
 
   home.sessionVariables = {
     SOPS_AGE_KEYFILE = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
@@ -64,14 +57,11 @@ in
     DISABLE_AUTOUPDATER = "1";
   };
 
-  home.sessionPath =
-    lib.optionals pkgs.stdenv.isDarwin [ "${config.home.homeDirectory}/.opencode/bin" ]
-    ++ [
-      "${config.home.homeDirectory}/.local/bin"
-      "${config.home.homeDirectory}/.bun/bin"
-      "${config.home.homeDirectory}/.nix-profile/bin"
-    ]
-    ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
+  home.sessionPath = [
+    "${config.home.homeDirectory}/.local/bin"
+    "${config.home.homeDirectory}/.bun/bin"
+    "${config.home.homeDirectory}/.nix-profile/bin"
+  ];
 
   programs.starship.enable = true;
 
@@ -98,9 +88,6 @@ in
       cat = "bat --paging=never";
       jq = "jaq";
       keycloak = "kcadm.sh";
-    }
-    // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      tailscale = "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
     };
 
     initContent = ''
@@ -112,13 +99,6 @@ in
       command -v pnpm >/dev/null && source <(pnpm completion zsh)
       command -v bun  >/dev/null && source <(bun completions)
       command -v gh   >/dev/null && eval "$(command gh completion -s zsh)"
-    ''
-    + lib.optionalString pkgs.stdenv.isDarwin ''
-
-      source ~/.orbstack/shell/init.zsh 2>/dev/null || :
-
-      [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ] \
-        && source <("/Applications/Tailscale.app/Contents/MacOS/Tailscale" completion zsh)
     '';
   };
 

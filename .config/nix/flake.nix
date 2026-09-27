@@ -43,7 +43,12 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = { inherit hostName username; };
-              home-manager.users.${username} = import ./home-common.nix;
+              home-manager.users.${username} = {
+                imports = [
+                  ./home-common.nix
+                  ./home-darwin.nix
+                ];
+              };
               home-manager.backupFileExtension = "backup";
               home-manager.overwriteBackup = true;
             }
@@ -60,6 +65,7 @@
           extraSpecialArgs = { inherit username; };
           modules = [
             ./home-common.nix
+            ./home-linux.nix
             {
               home.username = username;
               home.homeDirectory = "/home/${username}";
