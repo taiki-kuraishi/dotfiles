@@ -7,4 +7,4 @@ bunx skills add mattpocock/skills --skill wait-what writing-for-agents -g -y --a
 bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design/skills/frontend-design -g -y --agent universal
 bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code universal
 bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code universal
-bunx skills add taiki-kuraishi/skill --skill better-result typescript -g -y --agent claude-code universal
+bunx skills add taiki-kuraishi/skill --skill '*' -g -y --agent claude-code universal
