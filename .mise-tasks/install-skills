@@ -8,3 +8,4 @@ bunx skills add https://github.com/anthropics/claude-code/tree/main/plugins/fron
 bunx skills add herdrdev/herdr --skill herdr -g -y --agent claude-code universal
 bunx skills add https://github.com/anthropics/skills --skill skill-creator -g -y --agent claude-code universal
 bunx skills add taiki-kuraishi/skill --skill '*' -g -y --agent claude-code universal
+bunx skills add https://github.com/cloudflare/skills --skill '*' -g -y --agent claude-code universal
